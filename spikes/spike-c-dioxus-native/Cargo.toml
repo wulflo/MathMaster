@@ -1,0 +1,9 @@
+[package]
+name = "spike-c-dioxus-native"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+# Renderer nativo blitz/WGPU, sin webview. Sólo existe en la línea 0.8 alpha.
+dioxus = { version = "=0.8.0-alpha.3", features = ["native"] }

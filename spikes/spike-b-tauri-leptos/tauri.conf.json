@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "AnzanLab Spike B",
+  "version": "0.1.0",
+  "identifier": "dev.anzanlab.spikeb",
+  "build": {
+    "frontendDist": "frontend/dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "AnzanLab · spike B (Tauri 2 + Leptos)",
+        "width": 900,
+        "height": 600,
+        "resizable": false,
+        "alwaysOnTop": true,
+        "focus": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": false
+  }
+}

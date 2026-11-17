@@ -1,0 +1,192 @@
+{
+  "archivos": [
+    "desktop-20261114T013306Z-run1.json",
+    "desktop-20261114T013306Z-run2.json",
+    "desktop-20261114T013306Z-run3.json",
+    "desktop-20261114T013306Z-run4.json",
+    "desktop-20261114T013306Z-run5.json"
+  ],
+  "agregado": {
+    "corridas": 5,
+    "n_100ms_total": 5000,
+    "n_200ms_total": 1500,
+    "frame_real_100ms_min_ms": 16.093,
+    "frame_real_100ms_max_ms": 16.1,
+    "media_100ms_min_ms": 96.557,
+    "media_100ms_max_ms": 96.599,
+    "err_p95_100ms_max_ms": 4,
+    "err_p95_200ms_max_ms": 7,
+    "gaps_100ms_total": 0,
+    "gaps_200ms_total": 0,
+    "within_one_frame_100ms_min_pct": 100,
+    "audio_jitter_p95_us_max": 50,
+    "audio_late_blocks_total": 2
+  },
+  "detalle": [
+    {
+      "archivo": "desktop-20261114T013306Z-run1.json",
+      "has_focus": true,
+      "dpr": 2,
+      "calibracion_span_ms": 16.301255230125523,
+      "calibracion_mediana_ms": 16,
+      "drill_telemetry": "Frame p95 17.0 ms · Aparición p95 0.0 ms",
+      "drill_stimulus_ms": 2187,
+      "audio_jitter_p95_us": 50,
+      "audio_jitter_max_us": 5149,
+      "audio_clicks_started": 3,
+      "audio_late_blocks": 1,
+      "p100": {
+        "frame_real_ms": 16.1,
+        "mean_ms": 96.599,
+        "drift_pct": -3.401,
+        "err_p50_ms": 3,
+        "err_p95_ms": 4,
+        "err_max_ms": 4,
+        "within_one_frame_pct": 100,
+        "gaps_count": 0
+      },
+      "p200": {
+        "frame_real_ms": 16.103,
+        "mean_ms": 193.23,
+        "drift_pct": -3.385,
+        "err_p50_ms": 7,
+        "err_p95_ms": 7,
+        "err_max_ms": 8,
+        "within_one_frame_pct": 100,
+        "gaps_count": 0
+      }
+    },
+    {
+      "archivo": "desktop-20261114T013306Z-run2.json",
+      "has_focus": true,
+      "dpr": 2,
+      "calibracion_span_ms": 16.288702928870293,
+      "calibracion_mediana_ms": 16,
+      "drill_telemetry": "Frame p95 17.0 ms · Aparición p95 0.0 ms",
+      "drill_stimulus_ms": 2201,
+      "audio_jitter_p95_us": 50,
+      "audio_jitter_max_us": 151,
+      "audio_clicks_started": 3,
+      "audio_late_blocks": 0,
+      "p100": {
+        "frame_real_ms": 16.093,
+        "mean_ms": 96.557,
+        "drift_pct": -3.443,
+        "err_p50_ms": 3,
+        "err_p95_ms": 4,
+        "err_max_ms": 4,
+        "within_one_frame_pct": 100,
+        "gaps_count": 0
+      },
+      "p200": {
+        "frame_real_ms": 16.09,
+        "mean_ms": 193.083,
+        "drift_pct": -3.458,
+        "err_p50_ms": 7,
+        "err_p95_ms": 7,
+        "err_max_ms": 8,
+        "within_one_frame_pct": 100,
+        "gaps_count": 0
+      }
+    },
+    {
+      "archivo": "desktop-20261114T013306Z-run3.json",
+      "has_focus": true,
+      "dpr": 2,
+      "calibracion_span_ms": 16.225941422594143,
+      "calibracion_mediana_ms": 16,
+      "drill_telemetry": "Frame p95 17.0 ms · Aparición p95 0.0 ms",
+      "drill_stimulus_ms": 2217,
+      "audio_jitter_p95_us": 50,
+      "audio_jitter_max_us": 158,
+      "audio_clicks_started": 3,
+      "audio_late_blocks": 0,
+      "p100": {
+        "frame_real_ms": 16.099,
+        "mean_ms": 96.597,
+        "drift_pct": -3.403,
+        "err_p50_ms": 3,
+        "err_p95_ms": 4,
+        "err_max_ms": 4,
+        "within_one_frame_pct": 100,
+        "gaps_count": 0
+      },
+      "p200": {
+        "frame_real_ms": 16.09,
+        "mean_ms": 193.083,
+        "drift_pct": -3.458,
+        "err_p50_ms": 7,
+        "err_p95_ms": 7,
+        "err_max_ms": 8,
+        "within_one_frame_pct": 100,
+        "gaps_count": 0
+      }
+    },
+    {
+      "archivo": "desktop-20261114T013306Z-run4.json",
+      "has_focus": true,
+      "dpr": 2,
+      "calibracion_span_ms": 16.167364016736403,
+      "calibracion_mediana_ms": 16,
+      "drill_telemetry": "Frame p95 17.0 ms · Aparición p95 0.0 ms",
+      "drill_stimulus_ms": 2214,
+      "audio_jitter_p95_us": 50,
+      "audio_jitter_max_us": 5179,
+      "audio_clicks_started": 3,
+      "audio_late_blocks": 1,
+      "p100": {
+        "frame_real_ms": 16.099,
+        "mean_ms": 96.595,
+        "drift_pct": -3.405,
+        "err_p50_ms": 3,
+        "err_p95_ms": 4,
+        "err_max_ms": 4,
+        "within_one_frame_pct": 100,
+        "gaps_count": 0
+      },
+      "p200": {
+        "frame_real_ms": 16.101,
+        "mean_ms": 193.207,
+        "drift_pct": -3.397,
+        "err_p50_ms": 7,
+        "err_p95_ms": 7,
+        "err_max_ms": 7,
+        "within_one_frame_pct": 100,
+        "gaps_count": 0
+      }
+    },
+    {
+      "archivo": "desktop-20261114T013306Z-run5.json",
+      "has_focus": true,
+      "dpr": 2,
+      "calibracion_span_ms": 16.502092050209207,
+      "calibracion_mediana_ms": 16,
+      "drill_telemetry": "Frame p95 17.0 ms · Aparición p95 0.0 ms",
+      "drill_stimulus_ms": 2187,
+      "audio_jitter_p95_us": 50,
+      "audio_jitter_max_us": 101,
+      "audio_clicks_started": 3,
+      "audio_late_blocks": 0,
+      "p100": {
+        "frame_real_ms": 16.099,
+        "mean_ms": 96.591,
+        "drift_pct": -3.409,
+        "err_p50_ms": 3,
+        "err_p95_ms": 4,
+        "err_max_ms": 4,
+        "within_one_frame_pct": 100,
+        "gaps_count": 0
+      },
+      "p200": {
+        "frame_real_ms": 16.099,
+        "mean_ms": 193.183,
+        "drift_pct": -3.408,
+        "err_p50_ms": 7,
+        "err_p95_ms": 7,
+        "err_max_ms": 8,
+        "within_one_frame_pct": 100,
+        "gaps_count": 0
+      }
+    }
+  ]
+}

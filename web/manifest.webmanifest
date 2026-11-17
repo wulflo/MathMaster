@@ -1,0 +1,19 @@
+{
+  "name": "MathMaster",
+  "short_name": "MathMaster",
+  "description": "Entrenador progresivo de cálculo mental con soroban virtual",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "lang": "es",
+  "background_color": "#050b14",
+  "theme_color": "#050b14",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

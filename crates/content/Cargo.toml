@@ -1,0 +1,17 @@
+[package]
+name = "anzan-content"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Contenido pedagógico y textos localizados de MathMaster (RON validado)"
+
+[dependencies]
+anzan-core.workspace = true
+serde.workspace = true
+ron.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

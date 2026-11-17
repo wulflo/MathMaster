@@ -1,0 +1,45 @@
+# Configuración de cargo-deny para MathMaster.
+# Código: AGPL-3.0-or-later. Las dependencias deben ser compatibles.
+
+[graph]
+all-features = true
+
+[advisories]
+version = 2
+yanked = "warn"
+# `paste` es transitivo de Leptos (server_fn/reactive_graph). No tiene CVE y no hay
+# sustituto directo; se revisará al actualizar Leptos. Sin ignorar la advisories completa.
+ignore = [
+  { id = "RUSTSEC-2024-0436", reason = "paste 1.0.15 transitivo de Leptos; sin CVE y sin upgrade seguro" },
+  { id = "RUSTSEC-2024-0370", reason = "proc-macro-error 1.0.4 transitivo de gtk/glib 0.18 vía Tauri; unmaintained, sin CVE y sin upgrade compatible" },
+]
+
+[licenses]
+version = 2
+confidence-threshold = 0.9
+allow = [
+  "AGPL-3.0-or-later",
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Unicode-3.0",
+  "Unicode-DFS-2016",
+  "Zlib",
+  "MPL-2.0",
+  "CC0-1.0",
+  "OFL-1.1",
+  "BSL-1.0",
+]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+highlight = "all"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

@@ -1,0 +1,15 @@
+/target
+**/target
+/dist
+*.log
+.DS_Store
+
+# Enlaces locales a libxdo (workaround de esta máquina para el spike A).
+# Ver spikes/README.md.
+**/.libs/
+
+# Esquemas generados por tauri-build en cada compilación.
+**/gen/schemas/
+
+# Logs de las corridas de medición (los datos crudos sí se versionan).
+measurements/*.log

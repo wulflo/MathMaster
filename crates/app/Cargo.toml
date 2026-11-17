@@ -1,0 +1,25 @@
+[package]
+name = "anzan-app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Punto de entrada de MathMaster para web (wasm) y escritorio (Tauri)"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+anzan-core.workspace = true
+anzan-engine.workspace = true
+anzan-content.workspace = true
+anzan-ui.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen.workspace = true
+web-sys = { workspace = true, features = ["Window", "Document", "Element", "HtmlElement", "Navigator", "Location", "Storage"] }
+console_error_panic_hook.workspace = true
+
+[lints]
+workspace = true

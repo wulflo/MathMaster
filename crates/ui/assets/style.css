@@ -1,0 +1,1498 @@
+:root {
+  color-scheme: light;
+  --anzan-bg-1: #eaf3ff;
+  --anzan-bg-2: #dbe8ff;
+  --anzan-bg-3: #f7fbff;
+  --anzan-text: #0b1b33;
+  --anzan-muted: #43566f;
+  --anzan-surface: rgba(255, 255, 255, 0.62);
+  --anzan-surface-strong: rgba(255, 255, 255, 0.84);
+  --anzan-bead-top: #f9fcff;
+  --anzan-bead-bottom: #c6d8f2;
+  --anzan-bead-edge: rgba(11, 27, 51, 0.22);
+  --anzan-border: rgba(255, 255, 255, 0.72);
+  --anzan-accent-1: #1f5fd6; /* azul */
+  --anzan-accent-2: #0f766e; /* verde azulado */
+  --anzan-accent-3: #6d28d9; /* violeta */
+  --anzan-accent-4: #b45309; /* ámbar */
+  --anzan-accent-5: #be123c; /* rosa */
+  --anzan-accent-6: #4d7c0f; /* oliva */
+  --anzan-accent-7: #0e7490; /* cian */
+  --anzan-accent-8: #a21caf; /* fucsia */
+  --anzan-accent-9: #c2410c; /* naranja */
+  --anzan-accent-10: #4338ca; /* índigo */
+  --anzan-accent: var(--anzan-accent-1);
+  --anzan-on-accent: #ffffff;
+  --anzan-danger: #a3221c;
+  --anzan-bg-mix: 16%;
+  --anzan-bg-mix-soft: 8%;
+  --anzan-shadow: 0 24px 80px color-mix(in srgb, var(--anzan-accent-10) 16%, transparent);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --anzan-bg-1: #050b14;
+  --anzan-bg-2: #0a1830;
+  --anzan-bg-3: #101f3a;
+  --anzan-text: #eaf2ff;
+  --anzan-muted: #a9bcd8;
+  --anzan-surface: rgba(16, 30, 52, 0.62);
+  --anzan-surface-strong: rgba(18, 34, 58, 0.84);
+  --anzan-bead-top: #5b769c;
+  --anzan-bead-bottom: #29405f;
+  --anzan-bead-edge: rgba(190, 216, 255, 0.4);
+  --anzan-border: rgba(160, 200, 255, 0.24);
+  --anzan-accent-1: #7db2ff; /* azul */
+  --anzan-accent-2: #5eead4; /* verde azulado */
+  --anzan-accent-3: #c4b5fd; /* violeta */
+  --anzan-accent-4: #fbbf24; /* ámbar */
+  --anzan-accent-5: #fda4af; /* rosa */
+  --anzan-accent-6: #bef264; /* oliva */
+  --anzan-accent-7: #67e8f9; /* cian */
+  --anzan-accent-8: #f0abfc; /* fucsia */
+  --anzan-accent-9: #fdba74; /* naranja */
+  --anzan-accent-10: #a5b4fc; /* índigo */
+  --anzan-accent: var(--anzan-accent-1);
+  --anzan-on-accent: #0b1220;
+  --anzan-danger: #ff9d97;
+  --anzan-bg-mix: 26%;
+  --anzan-bg-mix-soft: 13%;
+  --anzan-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--anzan-text);
+  background: var(--anzan-bg-1);
+}
+
+.anzan-root {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.25rem;
+  background:
+    radial-gradient(
+      1100px 700px at 12% 8%,
+      color-mix(in srgb, var(--anzan-accent) 34%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      900px 600px at 92% 92%,
+      color-mix(in srgb, var(--anzan-accent) 20%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--anzan-accent) var(--anzan-bg-mix), var(--anzan-bg-1)) 0%,
+      var(--anzan-bg-2) 55%,
+      color-mix(in srgb, var(--anzan-accent) var(--anzan-bg-mix-soft), var(--anzan-bg-3)) 100%
+    );
+  background-attachment: fixed;
+}
+
+.anzan-card {
+  width: min(62rem, 100%);
+  padding: clamp(1.75rem, 4vw, 3rem);
+  border-radius: 2rem;
+  border: 1px solid var(--anzan-border);
+  background: linear-gradient(135deg, var(--anzan-surface-strong), var(--anzan-surface));
+  box-shadow:
+    var(--anzan-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .anzan-card {
+    background: var(--anzan-surface-strong);
+  }
+}
+
+.anzan-kicker {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--anzan-accent);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.6rem, 7vw, 4.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.anzan-tagline {
+  margin: 1rem 0 0;
+  max-width: 32ch;
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+  color: var(--anzan-muted);
+}
+
+.anzan-appearance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.6rem;
+  align-items: center;
+  margin-top: 1.1rem;
+}
+
+.anzan-accent-picker,
+.anzan-theme-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+}
+
+.anzan-theme-toggle {
+  border: 1px solid color-mix(in srgb, var(--anzan-accent) 38%, var(--anzan-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--anzan-accent) 8%, var(--anzan-surface));
+  color: var(--anzan-accent);
+  padding: 0.3rem 0.8rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.anzan-theme-toggle:hover {
+  border-color: var(--anzan-accent);
+}
+
+.anzan-theme-toggle:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 3px;
+}
+
+.anzan-accent-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.anzan-accent-swatch {
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--anzan-text) 20%, transparent);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition:
+    transform 120ms ease,
+    outline-color 120ms ease;
+}
+
+.anzan-accent-swatch:hover {
+  transform: scale(1.08);
+}
+
+.anzan-accent-swatch:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 3px;
+}
+
+.anzan-accent-swatch.is-active {
+  outline: 2px solid var(--anzan-text);
+  outline-offset: 2px;
+}
+
+.anzan-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--anzan-border);
+  font-size: 0.85rem;
+}
+
+.anzan-footer nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.anzan-footer a {
+  color: var(--anzan-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.anzan-footer a:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 3px;
+  border-radius: 0.35rem;
+}
+
+.anzan-footer a:hover {
+  text-decoration: underline;
+}
+
+.anzan-sep {
+  color: var(--anzan-muted);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .anzan-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--anzan-surface-strong);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Soroban interactivo */
+
+/* El acento es único y lo fija `.anzan-root`; todos los controles de la app lo
+   heredan. El selector de la cabecera cambia el índice de la paleta. */
+.anzan-soroban-panel {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--anzan-border);
+}
+
+.anzan-soroban-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.anzan-soroban-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+
+.anzan-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--anzan-accent);
+}
+
+.anzan-soroban {
+  position: relative;
+  width: 100%;
+  max-width: 42rem;
+  aspect-ratio: 4 / 3;
+  margin: 1.25rem auto;
+  border-radius: 1.25rem;
+  border: 1px solid var(--anzan-border);
+  background: color-mix(in srgb, var(--anzan-surface-strong) 70%, transparent);
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+.anzan-rod-line {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--anzan-muted) 35%, transparent),
+    color-mix(in srgb, var(--anzan-muted) 65%, transparent)
+  );
+  opacity: var(--anzan-rods-opacity, 1);
+  transition: opacity 160ms ease;
+}
+
+.anzan-beam {
+  position: absolute;
+  display: block;
+  left: 2%;
+  width: 96%;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--anzan-muted) 72%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  opacity: var(--anzan-rods-opacity, 1);
+  transition: opacity 160ms ease;
+  pointer-events: none;
+}
+
+.anzan-unit-mark {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  background: var(--anzan-accent);
+  opacity: var(--anzan-unit-opacity, 1);
+  transition: opacity 160ms ease;
+}
+
+.anzan-bead {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+  padding: 0;
+  border: clamp(0.18rem, 0.8vw, 0.45rem) solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--anzan-bead-top), var(--anzan-bead-bottom));
+  background-clip: padding-box;
+  box-shadow:
+    0 4px 12px rgba(8, 24, 52, 0.18),
+    inset 0 0 0 1px var(--anzan-bead-edge),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  opacity: var(--anzan-beads-opacity, 1);
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    background 120ms ease,
+    box-shadow 120ms ease,
+    opacity 160ms ease;
+}
+
+.anzan-bead.is-active {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--anzan-accent) 78%, white),
+    var(--anzan-accent)
+  );
+  background-clip: padding-box;
+  box-shadow:
+    0 6px 18px color-mix(in srgb, var(--anzan-accent) 40%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.anzan-bead.is-pressed {
+  transform: scale(0.9);
+}
+
+.anzan-bead:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 2px;
+}
+
+.anzan-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.anzan-control-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--anzan-muted);
+}
+
+.anzan-stage-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.anzan-stage,
+.anzan-toggle,
+.anzan-reset {
+  border: 1px solid color-mix(in srgb, var(--anzan-accent) 38%, var(--anzan-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--anzan-accent) 8%, var(--anzan-surface));
+  color: var(--anzan-accent);
+  padding: 0.42rem 0.75rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.anzan-stage.is-active {
+  background: var(--anzan-accent);
+  border-color: transparent;
+  color: var(--anzan-on-accent);
+}
+
+.anzan-stage:focus-visible,
+.anzan-toggle:focus-visible,
+.anzan-reset:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 3px;
+}
+
+.anzan-stage:hover,
+.anzan-toggle:hover,
+.anzan-reset:hover {
+  border-color: var(--anzan-accent);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .anzan-soroban {
+    background: var(--anzan-surface-strong);
+  }
+
+  .anzan-bead {
+    background: linear-gradient(180deg, var(--anzan-bead-top), var(--anzan-bead-bottom));
+  }
+
+  .anzan-bead.is-active {
+    background: var(--anzan-accent);
+  }
+}
+
+/* Flash Anzan */
+
+.anzan-drill {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--anzan-border);
+}
+
+.anzan-drill-intro {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--anzan-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.anzan-drill-status {
+  font-size: 0.8rem;
+  color: var(--anzan-muted);
+  white-space: nowrap;
+}
+
+.anzan-flash {
+  display: grid;
+  place-items: center;
+  min-height: 6.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--anzan-border);
+  border-radius: 1.2rem;
+  background: color-mix(in srgb, var(--anzan-surface-strong) 72%, transparent);
+  color: var(--anzan-text);
+  font-size: clamp(2.4rem, 9vw, 4.5rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.anzan-drill-config,
+.anzan-answer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.anzan-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--anzan-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.anzan-field input[type="number"],
+.anzan-field input[type="text"] {
+  width: 5.5rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--anzan-accent) 28%, var(--anzan-border));
+  border-radius: 0.7rem;
+  background: var(--anzan-surface);
+  color: var(--anzan-text);
+  font: inherit;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-field input:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 2px;
+}
+
+.anzan-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+  padding-bottom: 0.5rem;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 0.85rem;
+}
+
+.anzan-check input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--anzan-accent);
+}
+
+.anzan-start,
+.anzan-submit {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--anzan-accent);
+  color: var(--anzan-on-accent);
+  padding: 0.55rem 1.1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.anzan-start:disabled,
+.anzan-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.anzan-start:focus-visible,
+.anzan-submit:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 3px;
+}
+
+.anzan-answer[hidden],
+.anzan-drill-result[hidden] {
+  display: none;
+}
+
+.anzan-drill-result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--anzan-accent) 12%, transparent);
+}
+
+.anzan-drill-result strong {
+  color: var(--anzan-accent);
+}
+
+/* Progresión */
+
+.anzan-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--anzan-border);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--anzan-surface-strong) 55%, transparent);
+}
+
+.anzan-progress-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.anzan-progress-head h3 {
+  margin: 0;
+  color: var(--anzan-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.anzan-progress-mode {
+  color: var(--anzan-accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.anzan-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 1.4rem;
+  margin: 0;
+}
+
+.anzan-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.anzan-stats dt {
+  color: var(--anzan-muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.anzan-stats dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-level-change {
+  color: var(--anzan-accent);
+  font-weight: 700;
+}
+
+/* Repaso, casos e historial */
+
+.anzan-review,
+.anzan-case-stats,
+.anzan-history {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--anzan-border);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--anzan-surface-strong) 45%, transparent);
+}
+
+.anzan-review h3,
+.anzan-case-stats h3,
+.anzan-history h3 {
+  margin: 0;
+  color: var(--anzan-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.anzan-review p {
+  margin: 0;
+  color: var(--anzan-accent);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-case-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1.4rem;
+  margin: 0;
+}
+
+.anzan-case-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.anzan-case-grid dt {
+  color: var(--anzan-muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.anzan-case-grid dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-history-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.anzan-export {
+  border: 1px solid var(--anzan-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--anzan-accent);
+  padding: 0.3rem 0.8rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.anzan-export:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 2px;
+}
+
+.anzan-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anzan-session-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  color: var(--anzan-muted);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-session-when {
+  min-width: 9.5rem;
+}
+
+.anzan-session-level {
+  font-weight: 700;
+}
+
+.anzan-session-outcome {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--anzan-accent);
+}
+
+.anzan-empty[hidden] {
+  display: none;
+}
+
+.anzan-empty {
+  margin: 0;
+  color: var(--anzan-muted);
+  font-size: 0.85rem;
+}
+
+/* Audio nativo del host de escritorio */
+
+/* Multiplicación · 空盘前乘法 */
+
+.anzan-mul {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--anzan-border);
+}
+
+.anzan-mul-head {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.anzan-mul-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  align-items: baseline;
+}
+
+.anzan-mul-eyebrow {
+  margin: 0;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--anzan-accent) 14%, transparent);
+  color: var(--anzan-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.anzan-mul-head h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  letter-spacing: -0.02em;
+}
+
+.anzan-mul-intro {
+  margin: 0;
+  max-width: 72ch;
+  color: var(--anzan-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+/* Lecciones en tarjetas */
+
+.anzan-mul-lessons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.anzan-mul-lesson-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.2rem, 1fr));
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anzan-mul-lesson-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--anzan-accent) 26%, var(--anzan-border));
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--anzan-accent) 4%, var(--anzan-surface));
+  color: var(--anzan-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.anzan-mul-lesson-button.is-active {
+  background: var(--anzan-accent);
+  border-color: transparent;
+  color: var(--anzan-on-accent);
+}
+
+.anzan-mul-lesson-button.is-active .anzan-mul-lesson-id,
+.anzan-mul-lesson-button.is-active .anzan-mul-lesson-spec {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.anzan-mul-lesson-button:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 3px;
+}
+
+.anzan-mul-lesson-button:hover {
+  border-color: var(--anzan-accent);
+  transform: translateY(-1px);
+}
+
+.anzan-mul-lesson-id {
+  color: var(--anzan-accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-mul-lesson-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.anzan-mul-lesson-spec {
+  color: var(--anzan-muted);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dos columnas: lectura y ábaco */
+
+.anzan-mul-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+}
+
+@media (max-width: 780px) {
+  .anzan-mul-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.anzan-mul-reading,
+.anzan-mul-visual,
+.anzan-mul-formula {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--anzan-border);
+  border-radius: 1.1rem;
+  background: color-mix(in srgb, var(--anzan-surface-strong) 58%, transparent);
+}
+
+.anzan-mul-lesson-head h3 {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.3;
+}
+
+.anzan-mul-goal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0.45rem 0 0;
+  color: var(--anzan-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.anzan-mul-prose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.anzan-mul-paragraph {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.anzan-mul-example {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.15rem;
+  padding: 0.55rem 0.75rem;
+  border-left: 3px solid var(--anzan-accent);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--anzan-accent) 8%, transparent);
+  font-size: 0.9rem;
+}
+
+.anzan-mul-example strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ábaco dibujado */
+
+.anzan-mul-visual-head,
+.anzan-mul-steps-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.anzan-mul-visual-head h3,
+.anzan-mul-steps-head h3,
+.anzan-mul-table-hint,
+.anzan-mul-steps-head p {
+  margin: 0;
+  color: var(--anzan-muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.anzan-mul-steps-head p {
+  color: var(--anzan-accent);
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-abacus {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+  margin: 0;
+  padding: 0.85rem 0.6rem 0.7rem;
+  border: 1px solid var(--anzan-border);
+  border-radius: 1rem;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--anzan-accent) 8%, transparent),
+      transparent 55%
+    ),
+    color-mix(in srgb, var(--anzan-surface-strong) 82%, transparent);
+  list-style: none;
+}
+
+.anzan-abacus-rod {
+  position: relative;
+  flex: 0 1 3.4rem;
+  min-width: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.24rem;
+  padding: 0.2rem 0.1rem 0.35rem;
+}
+
+.anzan-abacus-rod::before {
+  content: "";
+  position: absolute;
+  top: 0.1rem;
+  bottom: 0.1rem;
+  width: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--anzan-muted) 32%, transparent);
+}
+
+.anzan-abacus-bead {
+  position: relative;
+  width: min(2.1rem, 100%);
+  height: 0.78rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--anzan-muted) 30%, transparent);
+  background: color-mix(in srgb, var(--anzan-muted) 16%, var(--anzan-surface-strong));
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.anzan-abacus-bead.is-active {
+  border-color: transparent;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--anzan-accent) 62%, white),
+    var(--anzan-accent)
+  );
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--anzan-accent) 40%, transparent);
+}
+
+.anzan-abacus-bead.is-heaven {
+  margin-bottom: 0.1rem;
+}
+
+.anzan-abacus-beam {
+  position: relative;
+  width: min(2.4rem, 100%);
+  height: 2px;
+  margin: 0.05rem 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--anzan-muted) 58%, transparent);
+}
+
+.anzan-abacus-digit {
+  position: relative;
+  margin-top: 0.25rem;
+  color: var(--anzan-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-mul-counter {
+  color: var(--anzan-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-mul-narration {
+  min-height: 2.6rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--anzan-surface) 70%, transparent);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-mul-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.anzan-mul-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--anzan-accent) 12%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.anzan-mul-result strong {
+  color: var(--anzan-accent);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-mul-result[hidden],
+.anzan-mul-visual[hidden],
+.anzan-mul-formula[hidden],
+.anzan-mul-feedback[hidden] {
+  display: none;
+}
+
+/* Atajos y modo mental: sólo la fórmula */
+
+.anzan-mul-formula {
+  justify-content: center;
+  gap: 0.45rem;
+  border-left: 3px solid var(--anzan-accent);
+}
+
+.anzan-mul-formula-caption {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-mul-conclusion {
+  margin: 0;
+  color: var(--anzan-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Tabla 大九九 y productos parciales */
+
+.anzan-mul-table-details {
+  margin-top: 0.2rem;
+  border: 1px solid var(--anzan-border);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--anzan-surface) 55%, transparent);
+}
+
+.anzan-mul-table-details summary {
+  padding: 0.55rem 0.8rem;
+  color: var(--anzan-accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.anzan-mul-table-details summary:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 2px;
+  border-radius: 0.6rem;
+}
+
+.anzan-mul-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.8rem 0.85rem 0.9rem;
+  border: 1px solid var(--anzan-border);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--anzan-surface-strong) 62%, transparent);
+}
+
+.anzan-mul-table-details .anzan-mul-table {
+  border: 0;
+  border-radius: 0 0 0.85rem 0.85rem;
+  background: transparent;
+}
+
+.anzan-mul-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.anzan-mul-table table,
+.anzan-mul-step-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-mul-table table {
+  font-size: 0.7rem;
+}
+
+.anzan-mul-table th,
+.anzan-mul-table td {
+  padding: 0.22rem 0.08rem;
+  text-align: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--anzan-muted) 16%, transparent);
+}
+
+.anzan-mul-table thead th {
+  color: var(--anzan-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.anzan-mul-table tbody th {
+  color: var(--anzan-accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.anzan-mul-table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--anzan-muted) 5%, transparent);
+}
+
+.anzan-mul-table td.is-example {
+  border-radius: 0.3rem;
+  background: var(--anzan-accent);
+  color: var(--anzan-on-accent);
+  font-weight: 800;
+}
+
+.anzan-mul-table-corner {
+  color: var(--anzan-muted);
+}
+
+.anzan-mul-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.85rem 1rem 0.95rem;
+  border: 1px solid var(--anzan-border);
+  border-radius: 1.1rem;
+  background: color-mix(in srgb, var(--anzan-surface-strong) 58%, transparent);
+}
+
+.anzan-mul-step-table {
+  font-size: 0.82rem;
+}
+
+.anzan-mul-step-table th,
+.anzan-mul-step-table td {
+  padding: 0.4rem 0.5rem;
+  text-align: right;
+  border-bottom: 1px solid color-mix(in srgb, var(--anzan-muted) 16%, transparent);
+}
+
+.anzan-mul-step-table thead th {
+  color: var(--anzan-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.anzan-mul-step-table tbody th {
+  text-align: left;
+  color: var(--anzan-muted);
+  font-weight: 700;
+}
+
+.anzan-mul-step-table tbody tr.is-done {
+  color: var(--anzan-muted);
+}
+
+.anzan-mul-step-table tbody tr.is-current {
+  background: color-mix(in srgb, var(--anzan-accent) 14%, transparent);
+}
+
+.anzan-mul-step-table tbody tr.is-current th {
+  color: var(--anzan-accent);
+}
+
+.anzan-mul-record {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+/* Práctica por niveles */
+
+.anzan-mul-practice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--anzan-border);
+}
+
+.anzan-mul-practice-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.anzan-mul-practice-head h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.anzan-mul-practice-head p {
+  margin: 0.3rem 0 0;
+  max-width: 62ch;
+  color: var(--anzan-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.anzan-mul-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.9rem;
+  margin: 0;
+  color: var(--anzan-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-mul-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.anzan-mul-level-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.2rem, 1fr));
+  gap: 0.4rem;
+}
+
+.anzan-mul-level-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--anzan-accent) 26%, var(--anzan-border));
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--anzan-accent) 4%, var(--anzan-surface));
+  color: var(--anzan-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.anzan-mul-level-card.is-active {
+  background: var(--anzan-accent);
+  border-color: transparent;
+  color: var(--anzan-on-accent);
+}
+
+.anzan-mul-level-card.is-active .anzan-mul-level-spec,
+.anzan-mul-level-card.is-active .anzan-mul-level-mental {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.anzan-mul-level-card:hover {
+  border-color: var(--anzan-accent);
+  transform: translateY(-1px);
+}
+
+.anzan-mul-level-card:focus-visible {
+  outline: 2px solid var(--anzan-accent);
+  outline-offset: 3px;
+}
+
+.anzan-mul-level-id {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.anzan-mul-level-spec {
+  color: var(--anzan-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.anzan-mul-level-mental {
+  color: var(--anzan-muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.anzan-mul-question-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--anzan-border);
+  border-radius: 1.15rem;
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      color-mix(in srgb, var(--anzan-accent) 14%, transparent),
+      transparent 60%
+    ),
+    color-mix(in srgb, var(--anzan-surface-strong) 68%, transparent);
+}
+
+.anzan-mul-practice .anzan-field input {
+  width: 7rem;
+}
+
+.anzan-mul-question {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.7rem, 7vw, 2.5rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.anzan-mul-meter {
+  height: 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--anzan-muted) 18%, transparent);
+  overflow: hidden;
+}
+
+.anzan-mul-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--anzan-accent) 70%, white),
+    var(--anzan-accent)
+  );
+  transition: width 180ms ease;
+}
+
+.anzan-mul-feedback {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.9rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.anzan-mul-feedback.is-correct {
+  background: color-mix(in srgb, var(--anzan-accent) 16%, transparent);
+  color: var(--anzan-accent);
+}
+
+.anzan-mul-feedback.is-wrong {
+  background: color-mix(in srgb, var(--anzan-danger) 16%, transparent);
+  color: var(--anzan-danger);
+}

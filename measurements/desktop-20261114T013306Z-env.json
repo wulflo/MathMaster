@@ -1,0 +1,16 @@
+{
+  "fecha_utc": "2026-11-14T01:33:06Z",
+  "host": "Linux mipc 7.3.3-1-cachyos #1 SMP PREEMPT_DYNAMIC Sat, 07 Nov 2026 13:54:44 +0000 x86_64 GNU/Linux",
+  "cpu": "AMD Ryzen 5 4600H with Radeon Graphics",
+  "gpu": "01:00.0 VGA compatible controller: NVIDIA Corporation GP107M [GeForce GTX 1050 3 GB Max-Q] (rev a1)\n05:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Renoir [Radeon Vega Series / Radeon Vega Mobile Series] (rev c7)",
+  "sesion": "wayland",
+  "escritorio": "GNOME",
+  "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13) (Arch Linux rust 1:1.99.1-2)",
+  "cargo_tauri": "tauri-cli 2.12.4",
+  "webkit2gtk": "2.54.2",
+  "gtk3": "3.24.52",
+  "audio": "Server Name: PulseAudio (on PipeWire 1.6.11)\nDefault Sink: alsa_output.pci-0000_05_00.6.analog-stereo",
+  "xrandr": "Screen 0: minimum 16 x 16, current 6272 x 1800, maximum 32767 x 32767\nHDMI-1 connected primary 3200x1800+0+0 (normal left inverted right x axis y axis) 440mm x 250mm\n   3200x1800     59.96*+\n   2048x1536     59.95  \n   1920x1440     59.97  \n   1600x1200     59.87",
+  "binario_sha256": "d64d57fd118eac8afb2c6e6c0b1f93e8ee8006d4f94c2cf8f6f0b9208f21605c",
+  "wasm_sha256": "bc4222bac208cc9adfe21683dee860802b29bd0f29447708342b5b1750e5a1bb"
+}

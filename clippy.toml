@@ -1,0 +1,4 @@
+# Configuración de Clippy para MathMaster.
+# El MSRV debe coincidir con rust-toolchain.toml.
+msrv = "1.99"
+avoid-breaking-exported-api = false

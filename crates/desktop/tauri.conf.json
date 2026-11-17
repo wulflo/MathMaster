@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "MathMaster",
+  "version": "0.1.0",
+  "identifier": "dev.anzanlab.desktop",
+  "build": {
+    "frontendDist": "../../dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "deb",
+      "appimage"
+    ],
+    "category": "Education",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png"
+    ],
+    "shortDescription": "Entrenador progresivo de cálculo mental con soroban virtual",
+    "longDescription": "MathMaster entrena cálculo mental con un soroban virtual y drills Flash Anzan con audio nativo de baja latencia."
+  }
+}

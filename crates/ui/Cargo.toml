@@ -1,0 +1,42 @@
+[package]
+name = "anzan-ui"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Componentes Leptos compartidos entre la web y el escritorio de MathMaster"
+
+[dependencies]
+anzan-core.workspace = true
+anzan-engine.workspace = true
+anzan-content.workspace = true
+leptos.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen.workspace = true
+js-sys.workspace = true
+wasm-bindgen-futures = "=0.4.80"
+web-sys = { workspace = true, features = [
+    "AudioBuffer",
+    "AudioBufferSourceNode",
+    "AudioContext",
+    "AudioDestinationNode",
+    "AudioNode",
+    "BaseAudioContext",
+    "Blob",
+    "BlobPropertyBag",
+    "Document",
+    "Element",
+    "HtmlAnchorElement",
+    "HtmlElement",
+    "MediaQueryList",
+    "Node",
+    "Performance",
+    "Storage",
+    "Url",
+    "Window",
+] }
+
+[lints]
+workspace = true
