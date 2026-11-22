@@ -15,10 +15,11 @@ MathMaster is a focused mental-arithmetic trainer built around the **soroban** (
 
 ## Preview
 
-| | |
+| Soroban — japonés | Flash Anzan |
 |---|---|
-| <img src="docs/screenshots/soroban.svg" width="200" alt="Soroban" /> | <img src="docs/screenshots/flash-anzan.svg" width="200" alt="Flash Anzan" /> |
-| <img src="docs/screenshots/learn.svg" width="200" alt="Learn" /> | <img src="docs/screenshots/progress.svg" width="200" alt="Progress" /> |
+| [**Soroban**]<br><img src="docs/screenshots/soroban.svg" width="320" alt="Soroban — abaco japonés con cuentas y varas" /><br>Varas de 4 a 13, cinco etapas de desvanecimiento, demostrador de movimiento. | [**Flash Anzan**]<br><img src="docs/screenshots/flash-anzan.svg" width="320" alt="Flash Anzan — cuenta atrás 3·2·1 y campo de respuesta" /><br>Suma o suma/resta mixta, fijación 3·2·1, reconocimiento instantáneo de respuesta. |
+| Learn — aprender | Progress — progreso |
+| [**Learn**]<br><img src="docs/screenshots/learn.svg" width="320" alt="Learn — lecciones paso a paso y Teii-hō" /><br>Anatomía del soroban, digitación ortodoxa, amigos pequeños y grandes, lecciones M0–M7. | [**Progress**]<br><img src="docs/screenshots/progress.svg" width="320" alt="Progress — panel de dominio, repaso espaciado y exportación CSV" /><br>Panel de dominio, repasos espaciados, diagnósticos por regla e historial de sesiones. |
 
 ## Table of contents
 
