@@ -1,39 +1,34 @@
 # MathMaster
 
+[![CI](https://github.com/wulflo/MathMaster/actions/workflows/ci.yml/badge.svg)](https://github.com/wulflo/MathMaster/actions/workflows/ci.yml)
+[![GitHub Pages](https://github.com/wulflo/MathMaster/actions/workflows/pages.yml/badge.svg)](https://wulflo.github.io/MathMaster/)
+[![License: AGPL-3.0-or-later](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg)](LICENSE)
+[![Rust 1.99+](https://img.shields.io/badge/rust-1.99%2B-orange.svg)](https://www.rust-lang.org/)
+
 **English** · [Español](README.es.md)
 
-MathMaster is a focused mental-arithmetic trainer built around the **soroban** (Japanese
-abacus) and *Anzan* (mental calculation). It teaches the abacus step by step, then fades
-the visual support away until sums, subtractions and front multiplication can be done
-mentally. The same Leptos UI runs as a static offline web app and inside a Tauri desktop
-host with native audio.
+MathMaster is a focused mental-arithmetic trainer built around the **soroban** (Japanese abacus) and *Anzan* (mental calculation). It teaches the abacus step by step, then fades the visual support away until sums, subtractions and front multiplication can be done mentally. The same Leptos UI runs as a static offline web app and inside a Tauri desktop host with native audio.
 
-**Web app:** <https://wulflo.github.io/MathMaster/> · **Source:**
-<https://github.com/wulflo/MathMaster>
+**🌐 Web app:** <https://wulflo.github.io/MathMaster/> · **📦 Source:** <https://github.com/wulflo/MathMaster>
 
-> The horizontal-tab redesign described below is built and verified locally; the published
-> Pages build may still show the earlier single-column release until it is republished.
+> The horizontal-tab redesign described below is built and verified locally; the published Pages build may still show the earlier single-column release until it is republished.
+
+## Table of contents
+
+- [Why it is different](#why-it-is-different)
+- [Application map](#application-map)
+- [Architecture](#architecture)
+- [Quick start](#quick-start)
+- [Documentation](#documentation)
+- [Licenses](#licenses)
 
 ## Why it is different
 
-- **Pedagogy first, speed second.** Six structured chapters cover abacus anatomy, orthodox
-  fingering, small friends (5-complements), large friends (10-complements), mixed families
-  and the progressive fade to mental Anzan. Multiplication lessons M0–M7 and shortcuts
-  S1–S4 include the mathematical foundation, *Teii-hō* rod positioning, a detailed
-  procedure, common traps and an annotated example.
-- **Frame-accurate timing.** Stimuli are planned in frames, never in loosely rounded
-  milliseconds. The exposure and gap controls show their frame equivalent and the resulting
-  terms/second in real time.
-- **Instant answer recognition.** Every practice mode focuses the answer field for you and
-  checks the value on each keystroke. A correct value is accepted immediately and, with
-  auto advance enabled by default, the next exercise starts at once. A wrong answer reveals
-  the expected value and offers a one-click walkthrough on the soroban.
-- **A complete training ground.** Flash Anzan (sum-only or mixed sums/subtractions, with a
-  3·2·1 fixation countdown), Mitori Anzan exam-style columns, leveled multiplication,
-  weakness-driven drills, spaced review, per-rule diagnostics and CSV export.
-- **Material Aero.** Material 3 tokens, translucent surfaces, ten selectable accents,
-  light/dark themes, reduced-motion and reduced-transparency support, and no full-screen
-  flashes.
+- **Pedagogy first, speed second.** Six structured chapters cover abacus anatomy, orthodox fingering, small friends (5-complements), large friends (10-complements), mixed families and the progressive fade to mental Anzan. Multiplication lessons M0–M7 and shortcuts S1–S4 include the mathematical foundation, *Teii-hō* rod positioning, a detailed procedure, common traps and an annotated example.
+- **Frame-accurate timing.** Stimuli are planned in frames, never in loosely rounded milliseconds. The exposure and gap controls show their frame equivalent and the resulting terms/second in real time.
+- **Instant answer recognition.** Every practice mode focuses the answer field for you and checks the value on each keystroke. A correct value is accepted immediately and, with auto advance enabled by default, the next exercise starts at once. A wrong answer reveals the expected value and offers a one-click walkthrough on the soroban.
+- **A complete training ground.** Flash Anzan (sum-only or mixed sums/subtractions, with a 3·2·1 fixation countdown), Mitori Anzan exam-style columns, leveled multiplication, weakness-driven drills, spaced review, per-rule diagnostics and CSV export.
+- **Material Aero.** Material 3 tokens, translucent surfaces, ten selectable accents, light/dark themes, reduced-motion and reduced-transparency support, and no full-screen flashes.
 
 ## Application map
 
@@ -44,11 +39,9 @@ host with native audio.
 | **Train** (default) | Flash Anzan · Mitori Anzan · Leveled multiplication · Targeted training |
 | **Progress** | Mastery panel · Spaced review · Rule diagnostics and session history |
 
-The default active tab is **Train → Flash Anzan**, which keeps the UI automation harnesses
-(`--ui-selftest` and `--measure`) working without extra navigation.
+The default active tab is **Train → Flash Anzan**, which keeps the UI automation harnesses (`--ui-selftest` and `--measure`) working without extra navigation.
 
-Keyboard: `←`/`→`/`Home`/`End` move between tabs, `0`–`9` and `Backspace` edit an answer,
-`Enter` confirms or continues, and `Space` starts or repeats a sequence.
+Keyboard: `←`/`→`/`Home`/`End` move between tabs, `0`–`9` and `Backspace` edit an answer, `Enter` confirms or continues, and `Space` starts or repeats a sequence.
 
 ## Architecture
 
@@ -62,11 +55,10 @@ Keyboard: `←`/`→`/`Home`/`End` move between tabs, `0`–`9` and `Backspace` 
 | `anzan-desktop` | Tauri 2 host: native cpal audio, disk persistence and automation harnesses. |
 
 Dependency direction is enforced by `scripts/check-deps.sh`:
+
 `ui → engine → core`, `content → core`, `app → ui/engine/content/core`, `desktop → engine/content`.
 
-No visible string lives in Rust: interface copy and course content are loaded from
-`crates/content/content/i18n/{es,en}.ron` and
-`crates/content/content/multiplication/{es,en}.ron`, and the loaders reject unknown keys.
+No visible string lives in Rust: interface copy and course content are loaded from `crates/content/content/i18n/{es,en}.ron` and `crates/content/content/multiplication/{es,en}.ron`, and the loaders reject unknown keys.
 
 ## Quick start
 
@@ -80,8 +72,7 @@ cargo tauri dev            # desktop host (needs webkit2gtk and dist/)
 cargo tauri build --bundles appimage,deb
 ```
 
-The desktop automation modes are `cargo tauri dev -- --ui-selftest` and
-`cargo tauri dev -- --measure` (see `scripts/measure-desktop.sh` for a full run).
+The desktop automation modes are `cargo tauri dev -- --ui-selftest` and `cargo tauri dev -- --measure` (see `scripts/measure-desktop.sh` for a full run).
 
 ## Documentation
 
@@ -135,6 +126,8 @@ Versions are pinned in `Cargo.toml`/`Cargo.lock`; `cargo deny check` verifies th
 | ALSA (desktop audio backend) | system | LGPL-2.1-or-later |
 | Web Audio API | browser implementation | W3C royalty-free specification |
 
-Transitive dependencies, including their licenses, are listed by `cargo deny list`;
-`deny.toml` documents the small set of unmaintained transitive crates that are currently
-ignored with a reason.
+Transitive dependencies, including their licenses, are listed by `cargo deny list`; `deny.toml` documents the small set of unmaintained transitive crates that are currently ignored with a reason.
+
+---
+
+Made with ❤️ and Rust · [wulflo/MathMaster](https://github.com/wulflo/MathMaster)
