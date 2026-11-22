@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240">
+  <defs>
+    <linearGradient id="bgF" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#eceff1"/>
+      <stop offset="100%" stop-color="#cfd8dc"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <rect width="400" height="240" rx="16" fill="url(#bgF)"/>
+  <rect x="24" y="120" width="352" height="4" rx="2" fill="#b0bec5"/>
+  <text x="200" y="56" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#546e7a" font-weight="600">Flash Anzan</text>
+  <text x="200" y="96" text-anchor="middle" font-family="monospace" font-size="56" fill="#1565c0" font-weight="900">7 4 2</text>
+  <text x="200" y="158" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#37474f">3 · 2 · 1  cuenta atrás</text>
+  <rect x="176" y="184" width="48" height="28" rx="8" fill="#1565c0"/>
+  <text x="200" y="202" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#fff" font-weight="700">Responder</text>
+  <circle cx="72" cy="72" r="10" fill="#ff5252" filter="url(#glow)"/>
+  <circle cx="328" cy="72" r="10" fill="#ff5252" filter="url(#glow)"/>
+  <circle cx="72" cy="116" r="8" fill="#ffab40" filter="url(#glow)"/>
+  <circle cx="328" cy="116" r="8" fill="#ffab40" filter="url(#glow)"/>
+  <rect x="14" y="14" width="26" height="26" rx="6" fill="#1565c0"/>
+  <text x="27" y="34" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="800">F</text>
+</svg>

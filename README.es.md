@@ -13,8 +13,16 @@ Entrenador progresivo de cálculo mental con **soroban virtual**, inspirado en e
 
 > El rediseño de pestañas horizontales descrito más abajo está construido y verificado localmente; la build publicada en GitHub Pages puede seguir mostrando la versión de una sola columna hasta que se republica.
 
+## Vista previa
+
+| | |
+|---|---|
+| <img src="docs/screenshots/soroban.svg" width="200" alt="Soroban" /> | <img src="docs/screenshots/flash-anzan.svg" width="200" alt="Flash Anzan" /> |
+| <img src="docs/screenshots/learn.svg" width="200" alt="Aprender" /> | <img src="docs/screenshots/progress.svg" width="200" alt="Progreso" /> |
+
 ## Tabla de contenidos
 
+- [Vista previa](#vista-previa)
 - [¿Por qué es diferente?](#por-qué-es-diferente)
 - [Mapa de la aplicación](#mapa-de-la-aplicación)
 - [Arquitectura](#arquitectura)

@@ -13,8 +13,16 @@ MathMaster is a focused mental-arithmetic trainer built around the **soroban** (
 
 > The horizontal-tab redesign described below is built and verified locally; the published Pages build may still show the earlier single-column release until it is republished.
 
+## Preview
+
+| | |
+|---|---|
+| <img src="docs/screenshots/soroban.svg" width="200" alt="Soroban" /> | <img src="docs/screenshots/flash-anzan.svg" width="200" alt="Flash Anzan" /> |
+| <img src="docs/screenshots/learn.svg" width="200" alt="Learn" /> | <img src="docs/screenshots/progress.svg" width="200" alt="Progress" /> |
+
 ## Table of contents
 
+- [Preview](#preview)
 - [Why it is different](#why-it-is-different)
 - [Application map](#application-map)
 - [Architecture](#architecture)
