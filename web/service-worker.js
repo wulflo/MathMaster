@@ -5,7 +5,7 @@
 // - Con red, una versión nueva se ve en la siguiente carga (sin wasm viejo en caché).
 // - Sin red, se sirve lo precacheado; una navegación cae al shell `index.html`.
 // El HTTP cache del navegador sigue evitando descargas repetidas cuando aplica.
-const VERSION = "mathmaster-v11";
+const VERSION = "mathmaster-v17";
 const ASSETS = [
   "./",
   "./index.html",

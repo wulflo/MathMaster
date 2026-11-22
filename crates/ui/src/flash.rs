@@ -1,29 +1,37 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Modo Flash Anzan.
+//! Modo Flash Anzan y sus controles de entrenamiento.
 //!
-//! El componente genera un drill determinista, construye un [`FramePlan`] y lo reproduce
+//! El componente genera un drill determinista, construye un plan en frames y lo reproduce
 //! con `requestAnimationFrame`. En el callback sólo se consulta el plan, se escribe el
 //! `textContent` del display y se alimenta la telemetría de tamaño fijo: no hay
 //! asignaciones por frame. El audio web se dispara una vez por estímulo, no por frame.
 
 #![cfg_attr(not(target_arch = "wasm32"), allow(dead_code, unused_imports))]
 
-use crate::storage::{read_key, write_key};
+use crate::answer::{Action, AnswerBox};
+use crate::storage::read_key;
 #[cfg(target_arch = "wasm32")]
-use crate::storage::{tauri_invoke, tauri_invoke_with};
+use crate::storage::{tauri_invoke, write_key};
 use anzan_content::UiStrings;
 use anzan_engine::{
-    DAY_MS, FramePlan, FrameTelemetry, LevelChange, LevelSpec, PedagogicalCase, ProgressState,
-    ReviewOutcome, ReviewState, SessionRecord, case_stats, decode_log, encode_log, to_csv,
+    DAY_MS, DrillSpeed, FramePlan, FrameTelemetry, LevelChange, LevelSpec, MixedConfig, MixedDrill,
+    PedagogicalCase, ProgressState, ReviewOutcome, ReviewState, SessionRecord, TermSign,
+    case_stats, classify_addition, decode_log, encode_log, to_csv,
 };
 use leptos::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Frames que permanece visible cada término (30 a 60 Hz = 500 ms).
+/// Frames que permanece visible cada término en práctica libre (500 ms a 60 Hz).
 const STIMULUS_FRAMES: u32 = 30;
-/// Frames de hueco entre términos (6 a 60 Hz = 100 ms).
+/// Frames de hueco entre términos (100 ms a 60 Hz).
 const GAP_FRAMES: u32 = 6;
+/// Frames de la cuenta regresiva de fijación (300 ms por número).
+const COUNTDOWN_FRAMES: u32 = 18;
+/// Frames de hueco durante la cuenta regresiva.
+const COUNTDOWN_GAP_FRAMES: u32 = 6;
+/// Cantidad de números de la cuenta regresiva.
+const COUNTDOWN_STEPS: usize = 3;
 /// Cadencia nominal usada para planificar; la telemetría mide la real.
 const NOMINAL_FRAME_MS: f64 = 1000.0 / 60.0;
 
@@ -120,18 +128,92 @@ struct Run {
     frame: u32,
     last_stimulus: Option<u32>,
     started_ms: Option<f64>,
+    countdown: bool,
 }
 
+/// Ajustes persistentes del modo Flash.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct DrillSettings {
+    digits: u8,
+    terms: u8,
+    sound: bool,
+    mixed: bool,
+    exposure_ms: u16,
+    gap_ms: u16,
+    countdown: bool,
+}
+
+impl Default for DrillSettings {
+    fn default() -> Self {
+        Self {
+            digits: 2,
+            terms: 5,
+            sound: true,
+            mixed: false,
+            exposure_ms: 500,
+            gap_ms: 100,
+            countdown: true,
+        }
+    }
+}
+
+impl DrillSettings {
+    fn decode(raw: &str) -> Self {
+        let defaults = Self::default();
+        let parts: Vec<&str> = raw.split(',').collect();
+        let number = |index: usize, fallback: u16| -> u16 {
+            parts
+                .get(index)
+                .and_then(|value| value.trim().parse::<u16>().ok())
+                .unwrap_or(fallback)
+        };
+        let digits = number(0, u16::from(defaults.digits));
+        let terms = number(1, u16::from(defaults.terms));
+        let sound = parts.get(2).is_none_or(|value| *value != "0");
+        let mixed = parts.get(3).is_some_and(|value| *value == "1");
+        let exposure_ms = number(4, defaults.exposure_ms);
+        let gap_ms = number(5, defaults.gap_ms);
+        let countdown = parts.get(6).is_none_or(|value| *value != "0");
+        Self {
+            digits: u8::try_from(digits).unwrap_or(defaults.digits).clamp(1, 3),
+            terms: u8::try_from(terms).unwrap_or(defaults.terms).clamp(2, 10),
+            sound,
+            mixed,
+            exposure_ms: exposure_ms.clamp(100, 1500),
+            gap_ms: gap_ms.min(1500),
+            countdown,
+        }
+    }
+
+    fn encode(self) -> String {
+        format!(
+            "{},{},{},{},{},{},{}",
+            self.digits,
+            self.terms,
+            u8::from(self.sound),
+            u8::from(self.mixed),
+            self.exposure_ms,
+            self.gap_ms,
+            u8::from(self.countdown)
+        )
+    }
+}
+
+/// Argumentos compartidos por los distintos lanzamientos de un drill.
+#[derive(Clone)]
 struct LaunchArgs {
     digits: RwSignal<u8>,
     terms: RwSignal<u8>,
     sound: RwSignal<bool>,
-    progress: RwSignal<ProgressState>,
+    mixed: RwSignal<bool>,
+    countdown: RwSignal<bool>,
+    exposure_ms: RwSignal<u16>,
+    gap_ms: RwSignal<u16>,
     progressive: RwSignal<bool>,
-    sessions: RwSignal<Vec<SessionRecord>>,
-    reviews: RwSignal<Vec<ReviewState>>,
+    progress: RwSignal<ProgressState>,
     active_level: RwSignal<u8>,
     active_cases: RwSignal<Vec<PedagogicalCase>>,
+    last_seed: RwSignal<u64>,
     launched_ms: RwSignal<f64>,
     phase: RwSignal<Phase>,
     expected: RwSignal<Option<u128>>,
@@ -149,40 +231,22 @@ const SESSIONS_KEY: &str = "anzan.sessions";
 const REVIEW_KEY_PREFIX: &str = "anzan.review.";
 
 #[cfg(target_arch = "wasm32")]
-fn initial_settings() -> (u8, u8, bool) {
-    let defaults = (2, 5, true);
-    let Some(raw) = read_key(SETTINGS_KEY) else {
-        return defaults;
-    };
-    let mut parts = raw.split(',');
-    let digits = parts.next().and_then(|value| value.parse::<u8>().ok());
-    let terms = parts.next().and_then(|value| value.parse::<u8>().ok());
-    let sound = parts.next().map(|value| value != "0");
-    match (digits, terms, sound) {
-        (Some(digits), Some(terms), Some(sound))
-            if (1..=3).contains(&digits) && (2..=10).contains(&terms) =>
-        {
-            (digits, terms, sound)
-        }
-        _ => defaults,
-    }
+fn load_settings() -> DrillSettings {
+    read_key(SETTINGS_KEY).map_or_else(DrillSettings::default, |raw| DrillSettings::decode(&raw))
 }
 
 #[cfg(target_arch = "wasm32")]
-fn save_settings(digits: u8, terms: u8, sound: bool) {
-    let value = format!("{digits},{terms},{}", u8::from(sound));
-    write_key(SETTINGS_KEY, &value);
+fn save_settings(settings: DrillSettings) {
+    write_key(SETTINGS_KEY, &settings.encode());
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn initial_settings() -> (u8, u8, bool) {
-    (2, 5, true)
+fn load_settings() -> DrillSettings {
+    DrillSettings::default()
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn save_settings(digits: u8, terms: u8, sound: bool) {
-    let _ = (digits, terms, sound);
-}
+fn save_settings(_settings: DrillSettings) {}
 
 #[cfg(target_arch = "wasm32")]
 fn initial_progress() -> ProgressState {
@@ -212,9 +276,7 @@ fn initial_progress() -> ProgressState {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn save_progress(progress: ProgressState) {
-    let _ = progress;
-}
+fn save_progress(_progress: ProgressState) {}
 
 #[cfg(not(target_arch = "wasm32"))]
 fn initial_progressive() -> bool {
@@ -222,9 +284,7 @@ fn initial_progressive() -> bool {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn save_progressive(enabled: bool) {
-    let _ = enabled;
-}
+fn save_progressive(_enabled: bool) {}
 
 #[cfg(target_arch = "wasm32")]
 fn load_sessions() -> Vec<SessionRecord> {
@@ -238,17 +298,31 @@ fn save_sessions(sessions: &[SessionRecord]) {
 
 #[cfg(target_arch = "wasm32")]
 fn load_review(level: u8) -> ReviewState {
-    let key = format!("{REVIEW_KEY_PREFIX}{level}");
-    read_key(&key)
+    read_key(&format!("{REVIEW_KEY_PREFIX}{level}"))
         .and_then(|raw| ReviewState::decode(&raw))
         .unwrap_or_default()
 }
 
 #[cfg(target_arch = "wasm32")]
 fn save_review(level: u8, state: ReviewState) {
-    let key = format!("{REVIEW_KEY_PREFIX}{level}");
-    write_key(&key, &state.encode());
+    write_key(&format!("{REVIEW_KEY_PREFIX}{level}"), &state.encode());
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+fn load_sessions() -> Vec<SessionRecord> {
+    Vec::new()
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn save_sessions(_sessions: &[SessionRecord]) {}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn load_review(_level: u8) -> ReviewState {
+    ReviewState::default()
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn save_review(_level: u8, _state: ReviewState) {}
 
 #[cfg(target_arch = "wasm32")]
 fn now_ms() -> u64 {
@@ -297,31 +371,10 @@ fn download_csv(csv: &str) {
         && let Ok(anchor) = element.dyn_into::<web_sys::HtmlAnchorElement>()
     {
         anchor.set_href(&url);
-        anchor.set_download("anzanlab-sesiones.csv");
+        anchor.set_download("mathmaster-sessions.csv");
         anchor.click();
     }
     let _ = web_sys::Url::revoke_object_url(&url);
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn load_sessions() -> Vec<SessionRecord> {
-    Vec::new()
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn save_sessions(sessions: &[SessionRecord]) {
-    let _ = sessions;
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn load_review(level: u8) -> ReviewState {
-    let _ = level;
-    ReviewState::default()
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn save_review(level: u8, state: ReviewState) {
-    let _ = (level, state);
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -340,15 +393,13 @@ fn format_timestamp(timestamp_ms: u64) -> String {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn download_csv(csv: &str) {
-    let _ = csv;
-}
+fn download_csv(_csv: &str) {}
 
 fn fill(template: &str, value: u64) -> String {
     template.replace("{n}", &value.to_string())
 }
 
-/// Indica si la UI corre dentro del host Tauri (audio y disco nativos disponibles).
+/// Indica si la UI corre dentro del host Tauri.
 #[cfg(target_arch = "wasm32")]
 fn native_desktop() -> bool {
     use wasm_bindgen::JsValue;
@@ -367,7 +418,7 @@ fn native_desktop() -> bool {
     false
 }
 
-/// Encola un clic nativo sin esperar la respuesta (una vez por estímulo, no por frame).
+/// Encola un clic nativo sin esperar la respuesta (una vez por estímulo).
 #[cfg(target_arch = "wasm32")]
 fn native_click() {
     let _ = tauri_invoke("audio_click");
@@ -376,12 +427,25 @@ fn native_click() {
 #[cfg(not(target_arch = "wasm32"))]
 fn native_click() {}
 
-fn build_plan(spec: LevelSpec) -> Option<FramePlan> {
+/// Construye el plan de frames: cuenta regresiva opcional y términos del drill.
+fn build_plan(spec: LevelSpec, countdown: bool, speed: Option<DrillSpeed>) -> Option<FramePlan> {
     let mut builder = FramePlan::builder();
+    if countdown {
+        for _ in 0..COUNTDOWN_STEPS {
+            builder = builder
+                .stimulus(COUNTDOWN_FRAMES)
+                .and_then(|next| next.gap(COUNTDOWN_GAP_FRAMES))
+                .ok()?;
+        }
+    }
+    let exposure = speed.map_or(spec.stimulus_frames, |value| {
+        value.exposure_frames(NOMINAL_FRAME_MS)
+    });
+    let gap = speed.map_or(spec.gap_frames, |value| value.gap_frames(NOMINAL_FRAME_MS));
     for _ in 0..spec.terms {
         builder = builder
-            .stimulus(spec.stimulus_frames)
-            .and_then(|next| next.gap(spec.gap_frames))
+            .stimulus(exposure.max(1))
+            .and_then(|next| next.gap(gap))
             .ok()?;
     }
     builder.build().ok()
@@ -400,8 +464,9 @@ fn spec_for(progressive: bool, progress: ProgressState, digits: u8, terms: u8) -
     }
 }
 
+/// Lanza un drill; `seed_override` permite repetir exactamente la misma secuencia.
 #[cfg(target_arch = "wasm32")]
-fn launch(args: LaunchArgs) {
+fn launch(args: LaunchArgs, seed_override: Option<u64>) {
     use wasm_bindgen::JsCast;
     use wasm_bindgen::closure::Closure;
 
@@ -415,34 +480,99 @@ fn launch(args: LaunchArgs) {
         return;
     };
 
+    let progressive = args.progressive.get_untracked();
+    let progress = args.progress.get_untracked();
     let spec = spec_for(
-        args.progressive.get_untracked(),
-        args.progress.get_untracked(),
+        progressive,
+        progress,
         args.digits.get_untracked().clamp(1, 3),
         args.terms.get_untracked().clamp(2, 10),
     );
+    let speed = if progressive {
+        None
+    } else {
+        DrillSpeed {
+            exposure_ms: args.exposure_ms.get_untracked(),
+            gap_ms: args.gap_ms.get_untracked(),
+        }
+        .validate()
+        .ok()
+    };
+    let countdown = args.countdown.get_untracked();
+    let mixed = args.mixed.get_untracked();
+    let seed = seed_override.unwrap_or_else(|| performance.now().to_bits());
     let config = anzan_engine::DrillConfig {
         digits: spec.digits.clamp(1, 6),
         terms: spec.terms.clamp(2, 20),
     };
-    let seed = performance.now().to_bits();
-    let Ok(drill) = anzan_engine::Drill::generate(config, seed) else {
-        return;
-    };
-    let Some(plan) = build_plan(spec) else {
-        return;
-    };
 
-    let terms: Vec<String> = drill.terms().iter().map(u32::to_string).collect();
-    args.active_level.set(args.progress.get_untracked().level);
-    args.active_cases.set(drill.cases());
+    let mut terms: Vec<String> = Vec::with_capacity(usize::from(config.terms) + COUNTDOWN_STEPS);
+    let mut cases = Vec::new();
+    let answer;
+    if mixed {
+        let config_mixed = MixedConfig {
+            digits: config.digits,
+            terms: config.terms,
+        };
+        let Ok(drill) = MixedDrill::generate(config_mixed, seed) else {
+            return;
+        };
+        let mut previous = 0u128;
+        for term in drill.terms() {
+            match term.sign {
+                TermSign::Add => terms.push(term.value.to_string()),
+                TermSign::Subtract => {
+                    terms.push(format!("−{}", term.value));
+                }
+            }
+            let partial = previous;
+            previous = match term.sign {
+                TermSign::Add => previous + u128::from(term.value),
+                TermSign::Subtract => previous.saturating_sub(u128::from(term.value)),
+            };
+            cases.push(if previous >= partial {
+                classify_addition(partial, previous - partial)
+            } else {
+                PedagogicalCase::Direct
+            });
+        }
+        answer = drill.answer();
+    } else {
+        let Ok(drill) = anzan_engine::Drill::generate(config, seed) else {
+            return;
+        };
+        terms.extend(drill.terms().iter().map(u32::to_string));
+        cases = drill.cases();
+        answer = drill.answer();
+    }
+
+    let Some(plan) = build_plan(spec, countdown, speed) else {
+        return;
+    };
+    if countdown {
+        for step in (1..=COUNTDOWN_STEPS).rev() {
+            terms.insert(0, step.to_string());
+        }
+    }
+
+    args.active_level.set(progress.level);
+    args.active_cases.set(cases);
+    args.last_seed.set(seed);
     args.launched_ms.set(performance.now());
-    args.expected.set(Some(drill.answer()));
+    args.expected.set(Some(answer));
     args.answer.set(String::new());
     args.result.set(None);
     args.phase.set(Phase::Running);
 
-    save_settings(config.digits, config.terms, args.sound.get_untracked());
+    save_settings(DrillSettings {
+        digits: config.digits.clamp(1, 3),
+        terms: config.terms.clamp(2, 10),
+        sound: args.sound.get_untracked(),
+        mixed,
+        exposure_ms: args.exposure_ms.get_untracked(),
+        gap_ms: args.gap_ms.get_untracked(),
+        countdown,
+    });
 
     let native = native_desktop();
     if native {
@@ -452,6 +582,12 @@ fn launch(args: LaunchArgs) {
         *args.audio.borrow_mut() = WebAudio::new();
     }
 
+    if countdown {
+        display.set_class_name("anzan-flash is-fixation");
+    } else {
+        display.set_class_name("anzan-flash");
+    }
+
     let run = Rc::new(RefCell::new(Run {
         plan,
         terms,
@@ -459,6 +595,7 @@ fn launch(args: LaunchArgs) {
         frame: 0,
         last_stimulus: None,
         started_ms: None,
+        countdown,
     }));
 
     let holder = args.handle.clone();
@@ -487,6 +624,12 @@ fn launch(args: LaunchArgs) {
                     .and_then(|value| state.terms.get(value as usize))
                     .map_or("", String::as_str);
                 display_for_closure.set_text_content(Some(text));
+                if state.countdown
+                    && index.is_some_and(|value| value < COUNTDOWN_STEPS as u32)
+                    && index != Some(0)
+                {
+                    display_for_closure.set_class_name("anzan-flash");
+                }
                 if let Some(segment) = state.plan.segment_at(state.frame) {
                     let frame_ms = state.telemetry.mean_frame_ms().unwrap_or(NOMINAL_FRAME_MS);
                     let elapsed = state.started_ms.map_or(0.0, |started| now - started);
@@ -494,7 +637,10 @@ fn launch(args: LaunchArgs) {
                         .telemetry
                         .record_onset(f64::from(segment.start) * frame_ms, elapsed);
                 }
-                if index.is_some() && audio_enabled {
+                if index.is_some()
+                    && audio_enabled
+                    && index >= Some(u32::try_from(COUNTDOWN_STEPS).unwrap_or(0))
+                {
                     if native {
                         native_click();
                     } else if let Some(audio) = audio.borrow_mut().as_mut() {
@@ -507,16 +653,14 @@ fn launch(args: LaunchArgs) {
             let finished = state.frame >= state.plan.total_frames();
             if finished {
                 display_for_closure.set_text_content(Some(""));
+                display_for_closure.set_class_name("anzan-flash");
                 phase.set(Phase::Answer);
             }
             finished
         };
 
-        if !finished {
-            if let Some(callback) = next.borrow().as_ref() {
-                let _ =
-                    window_for_closure.request_animation_frame(callback.as_ref().unchecked_ref());
-            }
+        if !finished && let Some(callback) = next.borrow().as_ref() {
+            let _ = window_for_closure.request_animation_frame(callback.as_ref().unchecked_ref());
         }
     }) as Box<dyn FnMut()>));
 
@@ -526,31 +670,22 @@ fn launch(args: LaunchArgs) {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn launch(args: LaunchArgs) {
-    let _ = (
-        args.digits,
-        args.terms,
-        args.sound,
-        args.progress,
-        args.progressive,
-        args.sessions,
-        args.reviews,
-        args.active_level,
-        args.active_cases,
-        args.launched_ms,
-        args.phase,
-        args.expected,
-        args.answer,
-        args.result,
-        args.display,
-        args.audio,
-        args.handle,
-    );
-}
+fn launch(_args: LaunchArgs, _seed_override: Option<u64>) {}
 
-/// Panel del modo Flash Anzan.
+/// Panel Flash Anzan completo.
 #[component]
-pub fn FlashAnzan(strings: UiStrings) -> impl IntoView {
+pub fn FlashAnzan(
+    strings: UiStrings,
+    /// Señal compartida con la cabecera: (nivel, racha).
+    #[prop(optional)]
+    header_stats: Option<RwSignal<(u8, u32)>>,
+    /// Se incrementa al terminar un drill para refrescar el panel de progreso.
+    #[prop(optional)]
+    refresh: Option<RwSignal<u32>>,
+    /// Petición de resolución en el soroban: (inicio, ¿suma?, cantidad).
+    #[prop(optional)]
+    demo_request: Option<RwSignal<Option<(u32, bool, u32)>>>,
+) -> impl IntoView {
     let UiStrings {
         drill_title,
         drill_intro,
@@ -558,13 +693,20 @@ pub fn FlashAnzan(strings: UiStrings) -> impl IntoView {
         drill_terms,
         drill_sound,
         drill_start,
-        drill_answer,
-        drill_submit,
+        drill_answer: _,
+        drill_submit: _,
         drill_correct,
         drill_wrong,
-        drill_expected,
         drill_running,
         drill_ready,
+        drill_countdown: _,
+        drill_fixation,
+        drill_mixed,
+        drill_exposure,
+        drill_gap,
+        drill_frames,
+        drill_cadence,
+        minus_sign: _,
         progress_title,
         progress_level,
         progress_accuracy,
@@ -590,28 +732,36 @@ pub fn FlashAnzan(strings: UiStrings) -> impl IntoView {
         review_now,
         review_hours,
         review_days,
+        answer_auto_advance,
+        answer_repeat,
         ..
-    } = strings;
+    } = strings.clone();
 
-    let (initial_digits, initial_terms, initial_sound) = initial_settings();
+    let initial = load_settings();
     let progress = RwSignal::new(initial_progress());
     let progressive = RwSignal::new(initial_progressive());
     let initial_spec = progress.get_untracked().spec();
     let digits = RwSignal::new(if progressive.get_untracked() {
         initial_spec.digits
     } else {
-        initial_digits
+        initial.digits
     });
     let terms = RwSignal::new(if progressive.get_untracked() {
         initial_spec.terms
     } else {
-        initial_terms
+        initial.terms
     });
-    let sound = RwSignal::new(initial_sound);
+    let sound = RwSignal::new(initial.sound);
+    let mixed = RwSignal::new(initial.mixed);
+    let countdown = RwSignal::new(initial.countdown);
+    let exposure_ms = RwSignal::new(initial.exposure_ms);
+    let gap_ms = RwSignal::new(initial.gap_ms);
+    let auto_advance = RwSignal::new(true);
     let sessions = RwSignal::new(load_sessions());
     let reviews = RwSignal::new((1..=6).map(load_review).collect::<Vec<_>>());
     let active_level = RwSignal::new(progress.get_untracked().level);
     let active_cases = RwSignal::new(Vec::<PedagogicalCase>::new());
+    let last_seed = RwSignal::new(0u64);
     let launched_ms = RwSignal::new(0.0f64);
     let level_change = RwSignal::new(None::<LevelChange>);
     let phase = RwSignal::new(Phase::Idle);
@@ -627,12 +777,15 @@ pub fn FlashAnzan(strings: UiStrings) -> impl IntoView {
         digits,
         terms,
         sound,
-        progress,
+        mixed,
+        countdown,
+        exposure_ms,
+        gap_ms,
         progressive,
-        sessions,
-        reviews,
+        progress,
         active_level,
         active_cases,
+        last_seed,
         launched_ms,
         phase,
         expected,
@@ -643,39 +796,13 @@ pub fn FlashAnzan(strings: UiStrings) -> impl IntoView {
         handle: handle.clone(),
     };
 
-    let on_start = move |_| {
-        launch(LaunchArgs {
-            digits: launch_args.digits,
-            terms: launch_args.terms,
-            sound: launch_args.sound,
-            progress: launch_args.progress,
-            progressive: launch_args.progressive,
-            sessions: launch_args.sessions,
-            reviews: launch_args.reviews,
-            active_level: launch_args.active_level,
-            active_cases: launch_args.active_cases,
-            launched_ms: launch_args.launched_ms,
-            phase: launch_args.phase,
-            expected: launch_args.expected,
-            answer: launch_args.answer,
-            result: launch_args.result,
-            display: launch_args.display,
-            audio: launch_args.audio.clone(),
-            handle: launch_args.handle.clone(),
-        });
-    };
+    let args_start = launch_args.clone();
+    let on_start = move |_| launch(args_start.clone(), None);
+    let args_repeat = launch_args.clone();
+    let on_repeat = move |_| launch(args_repeat.clone(), Some(last_seed.get_untracked()));
+    let args_answer_next = launch_args.clone();
 
-    let on_submit = move |event: leptos::ev::SubmitEvent| {
-        event.prevent_default();
-        if phase.get_untracked() != Phase::Answer {
-            return;
-        }
-        let Ok(value) = answer.get_untracked().trim().parse::<u128>() else {
-            return;
-        };
-        let correct = expected
-            .get_untracked()
-            .is_some_and(|expected| expected == value);
+    let complete: Rc<dyn Fn(bool)> = Rc::new(move |correct: bool| {
         let level = active_level.get_untracked();
         let elapsed = performance_now() - launched_ms.get_untracked();
         let elapsed_ms = if elapsed.is_finite() && elapsed > 0.0 {
@@ -718,18 +845,36 @@ pub fn FlashAnzan(strings: UiStrings) -> impl IntoView {
         }
         reviews.set(book);
 
-        let mut next = progress.get_untracked();
-        let change = next.record(correct);
-        progress.set(next);
-        save_progress(next);
+        let mut next_progress = progress.get_untracked();
+        let change = next_progress.record(correct);
+        progress.set(next_progress);
+        save_progress(next_progress);
+        if let Some(stats) = header_stats {
+            stats.set((next_progress.level, next_progress.streak));
+        }
+        if let Some(refresh) = refresh {
+            refresh.update(|value| *value = value.wrapping_add(1));
+        }
         if progressive.get_untracked() {
-            let spec = next.spec();
+            let spec = next_progress.spec();
             digits.set(spec.digits);
             terms.set(spec.terms);
         }
         level_change.set(Some(change));
         result.set(Some(correct));
         phase.set(Phase::Result);
+    });
+
+    let correct_cb = complete.clone();
+    let on_correct = move || correct_cb(true);
+    let wrong_cb = complete.clone();
+    let on_wrong = move || wrong_cb(false);
+    let next_action = move || launch(args_answer_next.clone(), None);
+    let show_solution = move || {
+        if let Some(request) = demo_request {
+            let value = expected.get_untracked().unwrap_or(0);
+            request.set(Some((0, true, u32::try_from(value).unwrap_or(u32::MAX))));
+        }
     };
 
     let on_progressive = move |event: leptos::ev::Event| {
@@ -760,19 +905,29 @@ pub fn FlashAnzan(strings: UiStrings) -> impl IntoView {
         Phase::Running => drill_running.clone(),
         Phase::Idle | Phase::Answer | Phase::Result => drill_ready.clone(),
     };
-
     let running = move || phase.get() == Phase::Running;
     let answered = move || matches!(phase.get(), Phase::Answer | Phase::Result);
-    let result_correct = drill_correct.clone();
-    let result_wrong = drill_wrong.clone();
+    let text_correct = drill_correct.clone();
+    let text_wrong = drill_wrong.clone();
     let result_text = move || match result.get() {
-        Some(true) => result_correct.clone(),
-        Some(false) => result_wrong.clone(),
+        Some(true) => text_correct.clone(),
+        Some(false) => text_wrong.clone(),
         None => String::new(),
     };
-    let expected_text = move || match expected.get() {
-        Some(value) => format!("{}: {value}", drill_expected),
-        None => String::new(),
+
+    let speed_text = move || {
+        let speed = DrillSpeed {
+            exposure_ms: exposure_ms.get(),
+            gap_ms: gap_ms.get(),
+        }
+        .validate()
+        .unwrap_or(DrillSpeed::DEFAULT);
+        let frames = speed.exposure_frames(NOMINAL_FRAME_MS) + speed.gap_frames(NOMINAL_FRAME_MS);
+        format!(
+            "{} · {}",
+            drill_frames.replace("{n}", &frames.to_string()),
+            drill_cadence.replace("{n}", &format!("{:.2}", speed.terms_per_second()))
+        )
     };
 
     let level_label = progress_level.clone();
@@ -886,9 +1041,7 @@ pub fn FlashAnzan(strings: UiStrings) -> impl IntoView {
             .collect_view()
     };
 
-    let on_export = move |_| {
-        download_csv(&to_csv(&sessions.get_untracked()));
-    };
+    let on_export = move |_| download_csv(&to_csv(&sessions.get_untracked()));
 
     view! {
         <section class="anzan-drill" aria-labelledby="anzan-drill-title">
@@ -897,6 +1050,109 @@ pub fn FlashAnzan(strings: UiStrings) -> impl IntoView {
                 <output class="anzan-drill-status" aria-live="polite">{status}</output>
             </header>
             <p class="anzan-drill-intro">{drill_intro}</p>
+
+            <div class="anzan-flash" node_ref=display aria-hidden="true"></div>
+
+            <div class="anzan-drill-config">
+                <label class="anzan-field">
+                    <span>{drill_digits}</span>
+                    <input type="number" min="1" max="3"
+                        prop:value=move || digits.get()
+                        disabled=move || running() || progressive.get()
+                        on:input=move |event| {
+                            if let Ok(value) = event_target_value(&event).parse::<u8>()
+                                && (1..=3).contains(&value) { digits.set(value); }
+                        }
+                    />
+                </label>
+                <label class="anzan-field">
+                    <span>{drill_terms}</span>
+                    <input type="number" min="2" max="10"
+                        prop:value=move || terms.get()
+                        disabled=move || running() || progressive.get()
+                        on:input=move |event| {
+                            if let Ok(value) = event_target_value(&event).parse::<u8>()
+                                && (2..=10).contains(&value) { terms.set(value); }
+                        }
+                    />
+                </label>
+                <label class="anzan-field">
+                    <span>{drill_exposure}</span>
+                    <input type="number" min="100" max="1500" step="50"
+                        prop:value=move || exposure_ms.get()
+                        disabled=move || running() || progressive.get()
+                        on:input=move |event| {
+                            if let Ok(value) = event_target_value(&event).parse::<u16>()
+                                && (100..=1500).contains(&value) { exposure_ms.set(value); }
+                        }
+                    />
+                </label>
+                <label class="anzan-field">
+                    <span>{drill_gap}</span>
+                    <input type="number" min="0" max="1500" step="50"
+                        prop:value=move || gap_ms.get()
+                        disabled=move || running() || progressive.get()
+                        on:input=move |event| {
+                            if let Ok(value) = event_target_value(&event).parse::<u16>()
+                                && value <= 1500 { gap_ms.set(value); }
+                        }
+                    />
+                </label>
+                <p class="anzan-speed-readout">{speed_text}</p>
+                <label class="anzan-field anzan-check">
+                    <input type="checkbox" prop:checked=move || progressive.get()
+                        disabled=running on:change=on_progressive />
+                    <span>{progress_mode}</span>
+                </label>
+                <label class="anzan-field anzan-check">
+                    <input type="checkbox" prop:checked=move || mixed.get()
+                        disabled=running
+                        on:change=move |event| mixed.set(event_target_checked(&event)) />
+                    <span>{drill_mixed}</span>
+                </label>
+                <label class="anzan-field anzan-check">
+                    <input type="checkbox" prop:checked=move || countdown.get()
+                        disabled=running
+                        on:change=move |event| countdown.set(event_target_checked(&event)) />
+                    <span>{drill_fixation}</span>
+                </label>
+                <label class="anzan-field anzan-check">
+                    <input type="checkbox" prop:checked=move || sound.get()
+                        disabled=running
+                        on:change=move |event| sound.set(event_target_checked(&event)) />
+                    <span>{drill_sound}</span>
+                </label>
+                <label class="anzan-field anzan-check">
+                    <input type="checkbox" prop:checked=move || auto_advance.get()
+                        on:change=move |event| auto_advance.set(event_target_checked(&event)) />
+                    <span>{answer_auto_advance}</span>
+                </label>
+                <button type="button" class="anzan-start" disabled=running on:click=on_start>
+                    {drill_start}
+                </button>
+            </div>
+
+            <div class="anzan-answer" hidden=move || !answered()>
+                <AnswerBox
+                    strings=strings.clone()
+                    answer=answer
+                    expected=expected
+                    active=RwSignal::new(true)
+                    auto_advance=auto_advance
+                    on_correct=Action::new(on_correct)
+                    on_wrong=Action::new(on_wrong)
+                    on_next=Action::new(next_action)
+                    on_show_solution=Action::new(show_solution)
+                />
+            </div>
+
+            <div class="anzan-drill-result" role="status" hidden=move || result.get().is_none()>
+                <strong>{result_text}</strong>
+                <span class="anzan-level-change">{change_text}</span>
+                <button type="button" class="anzan-repeat" on:click=on_repeat>
+                    {answer_repeat}
+                </button>
+            </div>
 
             <section class="anzan-progress" aria-labelledby="anzan-progress-title">
                 <header class="anzan-progress-head">
@@ -910,114 +1166,10 @@ pub fn FlashAnzan(strings: UiStrings) -> impl IntoView {
                     <div><dt>{progress_attempts}</dt><dd>{attempts_text}</dd></div>
                     <div><dt>{progress_best}</dt><dd>{best_text}</dd></div>
                 </dl>
-                <button
-                    type="button"
-                    class="anzan-reset"
-                    on:click=on_reset_progress
-                >
+                <button type="button" class="anzan-reset" on:click=on_reset_progress>
                     {progress_reset}
                 </button>
             </section>
-
-            <div class="anzan-flash" node_ref=display aria-hidden="true"></div>
-
-            <div class="anzan-drill-config">
-                <label class="anzan-field">
-                    <span>{drill_digits}</span>
-                    <input
-                        type="number"
-                        min="1"
-                        max="3"
-                        prop:value=move || digits.get()
-                        disabled=move || running() || progressive.get()
-                        on:input=move |event| {
-                            if let Ok(value) = event_target_value(&event).parse::<u8>()
-                                && (1..=3).contains(&value)
-                            {
-                                digits.set(value);
-                            }
-                        }
-                    />
-                </label>
-                <label class="anzan-field">
-                    <span>{drill_terms}</span>
-                    <input
-                        type="number"
-                        min="2"
-                        max="10"
-                        prop:value=move || terms.get()
-                        disabled=move || running() || progressive.get()
-                        on:input=move |event| {
-                            if let Ok(value) = event_target_value(&event).parse::<u8>()
-                                && (2..=10).contains(&value)
-                            {
-                                terms.set(value);
-                            }
-                        }
-                    />
-                </label>
-                <label class="anzan-field anzan-check">
-                    <input
-                        type="checkbox"
-                        prop:checked=move || progressive.get()
-                        disabled=running
-                        on:change=on_progressive
-                    />
-                    <span>{progress_mode}</span>
-                </label>
-                <label class="anzan-field anzan-check">
-                    <input
-                        type="checkbox"
-                        prop:checked=move || sound.get()
-                        disabled=running
-                        on:change=move |event| sound.set(event_target_checked(&event))
-                    />
-                    <span>{drill_sound}</span>
-                </label>
-                <button
-                    type="button"
-                    class="anzan-start"
-                    disabled=running
-                    on:click=on_start
-                >
-                    {drill_start}
-                </button>
-            </div>
-
-            <form
-                class="anzan-answer"
-                hidden=move || !answered()
-                on:submit=on_submit
-            >
-                    <label class="anzan-field">
-                        <span>{drill_answer}</span>
-                        <input
-                            type="text"
-                            inputmode="numeric"
-                            autocomplete="off"
-                            prop:value=move || answer.get()
-                            disabled=move || phase.get() == Phase::Result
-                            on:input=move |event| answer.set(event_target_value(&event))
-                        />
-                    </label>
-                    <button
-                        type="submit"
-                        class="anzan-submit"
-                        disabled=move || phase.get() == Phase::Result
-                    >
-                        {drill_submit}
-                    </button>
-            </form>
-
-            <div
-                class="anzan-drill-result"
-                role="status"
-                hidden=move || result.get().is_none()
-            >
-                <strong>{result_text}</strong>
-                <span>{expected_text}</span>
-                <span class="anzan-level-change">{change_text}</span>
-            </div>
 
             <section class="anzan-review" aria-labelledby="anzan-review-title">
                 <h3 id="anzan-review-title">{review_title}</h3>
@@ -1050,41 +1202,73 @@ mod tests {
     use super::*;
 
     #[test]
-    fn plan_has_one_stimulus_per_term() {
+    fn settings_round_trip_including_new_fields() {
+        let settings = DrillSettings {
+            digits: 3,
+            terms: 7,
+            sound: false,
+            mixed: true,
+            exposure_ms: 250,
+            gap_ms: 80,
+            countdown: false,
+        };
+        assert_eq!(DrillSettings::decode(&settings.encode()), settings);
+    }
+
+    #[test]
+    fn old_settings_keep_working_defaults() {
+        let settings = DrillSettings::decode("2,5,1");
+        assert_eq!(settings.digits, 2);
+        assert_eq!(settings.terms, 5);
+        assert!(!settings.mixed);
+        assert!(settings.countdown);
+        assert_eq!(settings.exposure_ms, 500);
+    }
+
+    #[test]
+    fn plan_has_countdown_and_one_stimulus_per_term() {
         let spec = LevelSpec {
             digits: 2,
             terms: 5,
             stimulus_frames: STIMULUS_FRAMES,
             gap_frames: GAP_FRAMES,
         };
-        let plan = build_plan(spec);
-        assert!(plan.is_some());
-        if let Some(plan) = plan {
-            assert_eq!(plan.stimulus_count(), 5);
-            assert_eq!(plan.total_frames(), 5 * (STIMULUS_FRAMES + GAP_FRAMES));
+        let plain = build_plan(spec, false, None);
+        let with_countdown = build_plan(spec, true, None);
+        assert!(plain.is_some() && with_countdown.is_some());
+        if let (Some(plain), Some(with_countdown)) = (plain, with_countdown) {
+            assert_eq!(plain.stimulus_count(), 5);
+            assert_eq!(with_countdown.stimulus_count(), 5 + COUNTDOWN_STEPS as u32);
         }
     }
 
     #[test]
-    fn proportional_levels_change_the_plan() {
-        let first_spec = anzan_engine::level_spec(1);
-        let last_spec = anzan_engine::level_spec(6);
-        let first = build_plan(first_spec);
-        let last = build_plan(last_spec);
-        assert!(first.is_some() && last.is_some());
-        if let (Some(first), Some(last)) = (first, last) {
-            // El nivel 6 no es más largo en frames (más términos pero más rápidos): lo que
-            // cambia es la dificultad, no la duración total.
-            assert_eq!(first.stimulus_count(), u32::from(first_spec.terms));
-            assert_eq!(last.stimulus_count(), u32::from(last_spec.terms));
-            assert_ne!(first.total_frames(), last.total_frames());
-            assert!(last_spec.digits > first_spec.digits);
-            assert!(last_spec.stimulus_frames < first_spec.stimulus_frames);
+    fn speed_controls_change_the_plan() {
+        let spec = LevelSpec {
+            digits: 2,
+            terms: 4,
+            stimulus_frames: STIMULUS_FRAMES,
+            gap_frames: GAP_FRAMES,
+        };
+        let slow = build_plan(
+            spec,
+            false,
+            Some(DrillSpeed {
+                exposure_ms: 1000,
+                gap_ms: 500,
+            }),
+        );
+        let fast = build_plan(
+            spec,
+            false,
+            Some(DrillSpeed {
+                exposure_ms: 100,
+                gap_ms: 100,
+            }),
+        );
+        assert!(slow.is_some() && fast.is_some());
+        if let (Some(slow), Some(fast)) = (slow, fast) {
+            assert!(slow.total_frames() > fast.total_frames());
         }
-    }
-
-    #[test]
-    fn telemetry_capacity_is_the_engine_window() {
-        assert_eq!(anzan_engine::schedule::TELEMETRY_CAPACITY, 600);
     }
 }

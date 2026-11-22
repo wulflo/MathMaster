@@ -2,6 +2,120 @@
 
 Entradas append-only. Formato: fecha · ID · acción · resultado · errores literales · próximo paso.
 
+## 2026-11-22 · R1-01 · Protocolo del rediseño integral
+- Acción: crear `docs/CHECKLIST-REDESENO.md` con 6 etapas y tareas atómicas R1-01…R6-03,
+  enlazarlo desde `docs/CHECKLIST.md` y fijar el protocolo de reanudación y los invariantes.
+- Resultado: checklist maestro creado antes de tocar código fuente; `git status` limpio al
+  inicio (único commit `a878af5`). Pestaña inicial prevista: Entrenamiento → Flash Anzan,
+  para conservar los selectores de los arneses de escritorio.
+- Errores: ninguno.
+- Próximo paso: R1-02, esquemas RON de fundamentos y lecciones ampliadas en `content`.
+
+## 2026-11-22 · R1-02..R1-04 · Cierre de la Etapa 1
+- Acción: ampliar `UiStrings` con 69 claves nuevas (pestañas, subsecciones, respuesta
+  ultrarrápida, Flash, laboratorio/demostrador, Mitori, dirigido y analítica); añadir
+  `FundamentalsContent` con 6 capítulos y tablas de fórmulas y enriquecer las 12 lecciones
+  con fundamento, Teii-hō, procedimiento, trampas y ejemplo comentado. Escritos es.ron/en.ron
+  con paridad exacta y 3 tests nuevos de contenido.
+- Resultado: `cargo test -p anzan-content` → 8 tests verdes; `./ci.sh` → **CI OK** tras
+  `cargo fmt --all`. Los textos pedagógicos siguen todos en los cuatro RON validados.
+- Errores: `cargo fmt --check` detectó líneas largas en los tests nuevos; corregido con
+  `cargo fmt --all`. Un asertado redundante (`drill_countdown` sin `{`) se eliminó.
+- Próximo paso: R2-01, `engine::speed` con validación de ms y conversión a frames.
+
+## 2026-11-22 · R2-01..R2-05 · Cierre de la Etapa 2
+- Acción: cuatro módulos nuevos en `anzan-engine`. `speed` valida 100..=1500 ms de
+  exposición y 0..=1500 de hueco y convierte a frames con `frames_for_duration`; `mixed`
+  genera sumas/restas con acumulado parcial ≥ 0; `focus` fuerza un caso pedagógico concreto
+  mediante una apertura determinista (1,1 / 1,4 / 9,1 / 99,1); `mitori` genera columnas
+  3..=15 filas y 2..=6 dígitos con separador de millares. Exportados en `engine::lib`.
+- Resultado: `cargo test -p anzan-engine` → **93 tests** verdes, incluidos 4 `proptest`
+  nuevos de 10 000 casos (velocidad, mixto, focalizado y Mitori). `./ci.sh` → **CI OK**.
+- Errores: (a) `?` en una función `const` de `mixed` no es estable en Rust 1.99; se
+  sustituyó por comparaciones explícitas. (b) `focus` exigía que *todos* los términos
+  fueran del caso pedido, imposible desde un acumulado 0; se reformuló como «al menos
+  una suma parcial del caso» con apertura forzada. (c) Clippy pidió `is_multiple_of`,
+  `contains` y `*term < 10^d`; corregido. Semilla de regresión guardada en
+  `crates/engine/proptest-regressions/speed.txt` y replayada correctamente.
+- Próximo paso: R3-01, arquitectura de pestañas horizontales en `crates/ui`.
+
+## 2026-11-22 · R3-01..R3-03 · Cierre de la Etapa 3
+- Acción: componente reutilizable `Tabs` (`role=tablist`, `aria-selected`, roving tabindex,
+  flechas/Home/End con focus) y `App` reestructurado en cabecera compacta + cuatro pestañas
+  con subpestañas. Nuevos `AppBar`, `LearnTabs`, `LabTabs`, `TrainTabs`, `ProgressTabs` y
+  `ProgressPanel` (dominio, repaso, diagnóstico desde almacenamiento). Dos claves i18n
+  nuevas `lang_es`/`lang_en` para el selector compacto. CSS: pestañas adosadas, indicador,
+  animación de panel, `[hidden]` global, breakpoints y `prefers-reduced-motion`.
+- Resultado: pestaña inicial **Entrenamiento → Flash Anzan**, por lo que los selectores
+  `.anzan-start`, `.anzan-answer`, `.anzan-submit`, `.anzan-drill-result` y
+  `.anzan-session-list li` siguen visibles sin navegación. `./ci.sh` → **CI OK**.
+- Errores: (a) `AnyView` no es `Clone`; se dividieron los paneles en subcomponentes que
+  construyen sus vistas. (b) Leptos no convierte automáticamente closures en
+  `MaybeSignal`; la cabecera pasa un `RwSignal<(u8,u32)>`. (c) Algunos `use` sólo válidos
+  en wasm se marcaron con `#[cfg]` para no romper clippy `-D warnings` en nativo.
+  (d) `cargo deny` detectó una advisory nueva en `url` 2.5.8; `cargo update -p url` fijó
+  2.5.9 (y `form_urlencoded` 1.2.3) y las advisories volvieron a estar limpias.
+- Próximo paso: R4-01, vista completa de fundamentos del soroban desde el RON.
+
+## 2026-11-22 · R4-01..R4-04 · Cierre de la Etapa 4
+- Acción: `FundamentalsView` renderiza los seis capítulos del RON con tablas de fórmulas,
+  pasos, trampas y un `FormulaDemo` interactivo que aplica cada fórmula con
+  `Soroban::plan_add/plan_sub` y dibuja el antes/después. La vista de multiplicación muestra
+  los cinco campos pedagógicos nuevos, filtra M0–M7 y S1–S4 y añade una tabla 大九九 con
+  resaltado de fila/columna. `SorobanBoard` acepta 4–13 varillas; `lab.rs` añade el selector
+  y el demostrador de movimientos con la regla de cada toque.
+- Resultado: `./ci.sh` → **CI OK**. Cadena visible preexistente `"空盘前乘法"` migrada al
+  RON (`mul_method_name`) junto con cuatro cabeceras de tablas de fórmulas y cinco
+  etiquetas pedagógicas nuevas; paridad es/en verificada por los tests de contenido.
+- Errores: (a) varias closures `move` capturaban `String` no `Copy`; se clonaron los valores
+  antes de construirlas. (b) Un test esperaba que 5−1 fuera inválido; se corrigió a 4.
+- Próximo paso: R5-01, componente `AnswerBox` con reconocimiento al teclear.
+
+## 2026-11-22 · R5-01..R5-04 · Cierre funcional de la Etapa 5
+- Acción: `AnswerBox` compartido (auto-foco, validación en `on:input`, acierto instantáneo
+  con animación de 300 ms, avance automático, fallo por longitud/Enter, «Ver en el
+  soroban», keypad y atajos). Flash Anzan incorpora cuenta regresiva 3·2·1 dentro del
+  mismo plan de frames (sin temporizadores nuevos), modo mixto con signo `−`, exposición y
+  hueco en ms con frames/cadencia en vivo y repetición de secuencia. Mitori Anzan y el
+  entrenamiento dirigido usan el mismo componente y comparten la petición de demostración
+  con el laboratorio. La práctica de multiplicación también migró al `AnswerBox`.
+- Resultado: `cargo test -p anzan-ui` → 22 tests verdes; `./ci.sh` → **CI OK**;
+  check `wasm32` limpio. El callback de rAF sigue sin asignaciones: el punto de fijación
+  se alterna con `set_class_name` de literales estáticos y el audio se dispara por estímulo.
+- Errores: (a) Leptos `Callback` exige `Send + Sync` y el bucle de audio usa `Rc`; se
+  definió `answer::Action` (`Rc<dyn Fn()>`) para las acciones locales. (b) `DomTokenList::add`
+  de web-sys 0.3.107 espera un `Array`, que asignaría por frame; se sustituyó por
+  `set_class_name` con literales. (c) `set_interval` devuelve `Result<i32, JsValue>`; se
+  guarda el handle sólo en caso de éxito.
+- Próximo paso: R5-05/R6-01, verificación en navegador y compatibilidad de los arneses
+  de escritorio.
+
+## 2026-11-22 · R5-05 y R6-01..R6-03 · Cierre del rediseño integral
+- Acción: los arneses `--ui-selftest`/`--measure` pasaron a consultar los controles dentro
+  de `.anzan-drill` (`.anzan-drill .anzan-start`, `.anzan-drill .anzan-answer`,
+  `.anzan-drill .anzan-submit`, `.anzan-drill .anzan-session-list li`) para no confundirlos
+  con los de Mitori, multiplicación o el demostrador. Readme reescrito en inglés con
+  mapa de pestañas, arquitectura, comandos y tablas de licencias de dependencias,
+  herramientas y componentes de sistema.
+- Verificación en navegador sobre `dist/`: el flujo del arnés completa un drill y registra
+  una sesión; teclear el valor exacto dispara acierto y avance automáticos; «Ver en el
+  soroban» abre Movimientos con la operación; la aplicación ocupa todo el ancho estable
+  (se eliminó `display:grid; place-items:center` de `web/index.html`, que centenaba el body
+  desde el spinner inicial); pestañas más amplias; chips de nivel/racha con separación y
+  padding; título con tipografía mayor y degradado; radios suavizados con tokens; campos y
+  botones alineados por la línea de base.
+- Diagramas vectoriales: `FundamentalsSection.diagram` en el RON (7 códigos con paridad
+  es/en) y componente `SvgDiagram` con esquemas SVG de anatomía, lectura, digitación,
+  complementos a 5 y 10, familia mixta y desvanecimiento. Son responsive (`viewBox` +
+  `width:100%`), usan tokens del tema y se verificaron en modo claro y oscuro.
+- Resultado: `./ci.sh` → **CI OK**; `./scripts/build-web.sh` → dist generado; 9 tests de
+  contenido y 22 de UI verdes. Service worker subido a `mathmaster-v17` para invalidar
+  cachés. **Todo el checklist en `[x]`. Sin publicar: los cambios están sólo en local.**
+- Errores: (a) `Callback` de Leptos exige `Send`, sustituido por `Action` local con `Rc`.
+  (b) `attr:viewBox` y `attr:text-anchor` se emitían como atributos literales; se usaron
+  `viewBox` y `text-anchor`. (c) La caché del service worker sirvió builds antiguos hasta
+  subir de versión y limpiar registros.
+
 ## 2026-11-13 · P1-001 · Protocolo de continuidad
 - Acción: inspección del directorio de trabajo (vacío, sin repo git), creación de `docs/` y protocolo.
 - Resultado: entorno verificado: rustc 1.99.1 (2026-10-13, Arch), GNOME/Wayland, webkit2gtk 4.1, ALSA con salida analógica (card 1).

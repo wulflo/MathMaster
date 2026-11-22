@@ -5,6 +5,7 @@
 //! motor. El reproductor sólo avanza o retrocede el índice de paso; el estado de las
 //! varillas se lee de `Multiplication::state_after`, sin animaciones por frame.
 
+use crate::answer::{Action, AnswerBox};
 use crate::storage::{read_key, write_key};
 use anzan_content::{MultiplicationContent, MultiplicationLesson, UiStrings};
 use anzan_engine::multiplication::{
@@ -31,7 +32,7 @@ struct StepLabels {
 }
 
 /// Ábaco de sólo lectura: una varilla por cifra, con bola superior y cuatro inferiores.
-fn abacus_view(digits: &[u8], label: &str) -> AnyView {
+pub(crate) fn abacus_view(digits: &[u8], label: &str) -> AnyView {
     let rods = digits
         .iter()
         .map(|digit| {
@@ -69,7 +70,7 @@ fn abacus_view(digits: &[u8], label: &str) -> AnyView {
 }
 
 /// Tabla 大九九 completa, con el producto escrito siempre con dos cifras.
-fn ninety_nine_table(title: &str, hint: &str, highlight: Option<(u32, u32)>) -> AnyView {
+pub(crate) fn ninety_nine_table(title: &str, hint: &str, highlight: Option<(u32, u32)>) -> AnyView {
     let head = (1..=9)
         .map(|column| view! { <th scope="col">{column.to_string()}</th> }.into_any())
         .collect_view();
@@ -165,7 +166,13 @@ fn step_table_view(task: &Multiplication, current: usize, labels: &StepLabels) -
 
 /// Panel de aprendizaje de la multiplicación.
 #[component]
-pub fn MultiplicationLearn(strings: UiStrings, content: MultiplicationContent) -> impl IntoView {
+pub fn MultiplicationLearn(
+    strings: UiStrings,
+    content: MultiplicationContent,
+    /// 0 = todas las lecciones, 1 = M0..M7, 2 = atajos S1..S4.
+    #[prop(default = 0u8)]
+    kind: u8,
+) -> impl IntoView {
     let strings_for_practice = strings.clone();
     let UiStrings {
         mul_lessons,
@@ -182,6 +189,12 @@ pub fn MultiplicationLearn(strings: UiStrings, content: MultiplicationContent) -
         mul_abacus_title,
         mul_table_title,
         mul_table_hint,
+        mul_foundation,
+        mul_positioning,
+        mul_procedure,
+        mul_pitfalls,
+        mul_annotated,
+        mul_method_name,
         mul_steps_title,
         mul_col_step,
         mul_col_product,
@@ -195,6 +208,11 @@ pub fn MultiplicationLearn(strings: UiStrings, content: MultiplicationContent) -
     let entries: Vec<Entry> = content
         .lessons
         .into_iter()
+        .filter(|lesson| match kind {
+            1 => lesson.id.starts_with('M'),
+            2 => lesson.id.starts_with('S'),
+            _ => true,
+        })
         .map(|lesson| {
             let task =
                 Multiplication::new(lesson.example.multiplicand, lesson.example.multiplier).ok();
@@ -247,6 +265,11 @@ pub fn MultiplicationLearn(strings: UiStrings, content: MultiplicationContent) -
     let entries_body = entries.clone();
     let goal_label = mul_goal;
     let example_label = mul_example.clone();
+    let foundation_label = mul_foundation;
+    let positioning_label = mul_positioning;
+    let procedure_label = mul_procedure;
+    let pitfalls_label = mul_pitfalls;
+    let annotated_label = mul_annotated;
     let lesson_body = move || {
         let Some(entry) = entries_body.get(selected.get()) else {
             return view! { <p></p> }.into_any();
@@ -257,6 +280,21 @@ pub fn MultiplicationLearn(strings: UiStrings, content: MultiplicationContent) -
             .iter()
             .map(|text| view! { <p class="anzan-mul-paragraph">{text.clone()}</p> }.into_any())
             .collect_view();
+        let procedure_steps = lesson
+            .procedure
+            .iter()
+            .map(|text| view! { <li>{text.clone()}</li> }.into_any())
+            .collect_view();
+        let pitfalls = lesson
+            .pitfalls
+            .iter()
+            .map(|text| view! { <li>{text.clone()}</li> }.into_any())
+            .collect_view();
+        let annotated = lesson
+            .annotated_example
+            .iter()
+            .map(|text| view! { <li>{text.clone()}</li> }.into_any())
+            .collect_view();
         view! {
             <header class="anzan-mul-lesson-head">
                 <h3>{lesson.title.clone()}</h3>
@@ -266,6 +304,18 @@ pub fn MultiplicationLearn(strings: UiStrings, content: MultiplicationContent) -
                 </p>
             </header>
             <div class="anzan-mul-prose">{paragraphs}</div>
+            <section class="anzan-mul-deep">
+                <h4>{foundation_label.clone()}</h4>
+                <p>{lesson.foundation.clone()}</p>
+                <h4>{positioning_label.clone()}</h4>
+                <p>{lesson.positioning.clone()}</p>
+                <h4>{procedure_label.clone()}</h4>
+                <ol>{procedure_steps}</ol>
+                <h4>{pitfalls_label.clone()}</h4>
+                <ul>{pitfalls}</ul>
+                <h4>{annotated_label.clone()}</h4>
+                <ol>{annotated}</ol>
+            </section>
             <div class="anzan-mul-example">
                 <span class="anzan-control-label">{example_label.clone()}</span>
                 <strong>{lesson.example.caption.clone()}</strong>
@@ -445,7 +495,7 @@ pub fn MultiplicationLearn(strings: UiStrings, content: MultiplicationContent) -
         <section class="anzan-mul" aria-labelledby="anzan-mul-title">
             <header class="anzan-mul-head">
                 <div class="anzan-mul-heading">
-                    <p class="anzan-mul-eyebrow">"空盘前乘法"</p>
+                    <p class="anzan-mul-eyebrow">{mul_method_name}</p>
                     <h2 id="anzan-mul-title">{title}</h2>
                 </div>
                 <p class="anzan-mul-intro">{intro}</p>
@@ -507,7 +557,9 @@ pub fn MultiplicationLearn(strings: UiStrings, content: MultiplicationContent) -
 
             <div hidden=move || !has_steps.get()>{step_table}</div>
 
-            <MultiplicationPractice strings=strings_for_practice />
+            <section hidden=kind == 2>
+                <MultiplicationPractice strings=strings_for_practice />
+            </section>
         </section>
     }
 }
@@ -535,6 +587,7 @@ fn level_label(
 ///
 /// Devuelve `None` si el texto no es un entero sin signo; en ese caso no se cuenta el
 /// intento y la UI deja el campo como estaba.
+#[cfg(test)]
 fn parse_answer(drill: &MultiplicationDrill, raw: &str) -> Option<bool> {
     let value = raw.trim().parse::<u64>().ok()?;
     Some(drill.is_correct(value))
@@ -590,12 +643,13 @@ fn now_ms() -> f64 {
 /// Bloque de práctica por niveles con ejercicios generados.
 #[component]
 pub fn MultiplicationPractice(strings: UiStrings) -> impl IntoView {
+    let strings_for_answer = strings.clone();
     let UiStrings {
         mul_practice_title,
         mul_practice_intro,
         mul_practice_level,
-        mul_practice_answer,
-        mul_practice_check,
+        mul_practice_answer: _,
+        mul_practice_check: _,
         mul_practice_new,
         mul_correct,
         mul_wrong,
@@ -610,13 +664,20 @@ pub fn MultiplicationPractice(strings: UiStrings) -> impl IntoView {
     let seed = RwSignal::new(1u64);
     let drill = RwSignal::new(MultiplicationDrill::generate(initial_level, 1));
     let answer = RwSignal::new(String::new());
+    let expected = RwSignal::new(Some(u128::from(
+        MultiplicationDrill::generate(initial_level, 1)
+            .task()
+            .product(),
+    )));
     let feedback = RwSignal::new(None::<bool>);
+    let auto_advance = RwSignal::new(true);
     let progress = RwSignal::new(initial_progress());
     let elapsed = RwSignal::new(0u64);
     let started = RwSignal::new(now_ms());
 
     let reset_round = move || {
         answer.set(String::new());
+        expected.set(Some(u128::from(drill.get_untracked().task().product())));
         feedback.set(None);
         elapsed.set(0);
         started.set(now_ms());
@@ -674,14 +735,7 @@ pub fn MultiplicationPractice(strings: UiStrings) -> impl IntoView {
         )
     };
 
-    let on_submit = move |event: leptos::ev::SubmitEvent| {
-        event.prevent_default();
-        if feedback.get_untracked().is_some() {
-            return;
-        }
-        let Some(is_correct) = parse_answer(&drill.get_untracked(), &answer.get_untracked()) else {
-            return;
-        };
+    let complete = move |is_correct: bool| {
         let current_level = level.get_untracked();
         progress.update(|state| state.record(current_level, is_correct));
         write_key(MUL_PROGRESS_KEY, &progress.get_untracked().encode());
@@ -694,6 +748,10 @@ pub fn MultiplicationPractice(strings: UiStrings) -> impl IntoView {
         });
         feedback.set(Some(is_correct));
     };
+
+    let on_correct = Action::new(move || complete(true));
+    let on_wrong = Action::new(move || complete(false));
+    let on_next = Action::new(next);
 
     let wrong_text = mul_wrong;
     let feedback_view = move || match feedback.get() {
@@ -764,33 +822,84 @@ pub fn MultiplicationPractice(strings: UiStrings) -> impl IntoView {
                 <p class="anzan-mul-question" aria-live="polite">
                     {question}
                 </p>
-                <form class="anzan-answer" on:submit=on_submit>
-                    <label class="anzan-field">
-                        <span>{mul_practice_answer}</span>
-                        <input
-                            type="text"
-                            inputmode="numeric"
-                            autocomplete="off"
-                            prop:value=move || answer.get()
-                            readonly=move || feedback.get().is_some()
-                            on:input=move |event| answer.set(event_target_value(&event))
-                        />
-                    </label>
-                    <button
-                        type="submit"
-                        class="anzan-submit"
-                        disabled=move || feedback.get().is_some()
-                    >
-                        {mul_practice_check}
-                    </button>
+                <div class="anzan-answer">
+                    <AnswerBox
+                        strings=strings_for_answer
+                        answer=answer
+                        expected=expected
+                        active=RwSignal::new(true)
+                        auto_advance=auto_advance
+                        on_correct=on_correct
+                        on_wrong=on_wrong
+                        on_next=on_next
+                    />
                     <button type="button" class="anzan-reset" on:click=move |_| next()>
                         {mul_practice_new}
                     </button>
-                </form>
+                </div>
                 <div class="anzan-mul-meter" aria-hidden="true">
                     <span style:width=meter_width></span>
                 </div>
                 {feedback_view}
+            </div>
+        </section>
+    }
+}
+
+/// Tabla 大九九 interactiva: al elegir una celda se resaltan su fila y su columna.
+#[component]
+pub fn Table99View(strings: UiStrings) -> impl IntoView {
+    let selected = RwSignal::new(None::<(u32, u32)>);
+    let title = strings.mul_table_title;
+    let hint = strings.mul_table_hint;
+    let head = (1..=9)
+        .map(|column| view! { <th scope="col">{column.to_string()}</th> }.into_any())
+        .collect_view();
+    let rows = (1..=9u32)
+        .map(|row| {
+            let cells = (1..=9u32)
+                .map(|column| {
+                    let product = row * column;
+                    view! {
+                        <td>
+                            <button
+                                type="button"
+                                class="anzan-table99-cell"
+                                class:is-row=move || selected.get().is_some_and(|cell| cell.0 == row)
+                                class:is-col=move || selected.get().is_some_and(|cell| cell.1 == column)
+                                class:is-selected=move || selected.get() == Some((row, column))
+                                aria-label=format!("{row}×{column}")
+                                on:click=move |_| selected.set(Some((row, column)))
+                            >
+                                {format!("{product:02}")}
+                            </button>
+                        </td>
+                    }
+                    .into_any()
+                })
+                .collect_view();
+            view! {
+                <tr>
+                    <th scope="row">{row.to_string()}</th>
+                    {cells}
+                </tr>
+            }
+            .into_any()
+        })
+        .collect_view();
+    view! {
+        <section class="anzan-mul-table" aria-label=title>
+            <p class="anzan-mul-table-hint">{hint}</p>
+            <div class="anzan-mul-table-scroll">
+                <table class="anzan-table99">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="anzan-mul-table-corner">"×"</th>
+                            {head}
+                        </tr>
+                    </thead>
+                    <tbody>{rows}</tbody>
+                </table>
             </div>
         </section>
     }

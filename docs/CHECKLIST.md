@@ -1,11 +1,19 @@
 # CHECKLIST — MathMaster
 
+> **Rediseño integral (UX, pedagogía y entrenamiento):** el plan maestro con estado por
+> subtarea está en [`CHECKLIST-REDESENO.md`](CHECKLIST-REDESENO.md). Léase primero al
+> reanudar; este archivo conserva el histórico de fases 1–M y 5.
+
 Fuente única de verdad del proyecto. Estados:
 `[ ]` pendiente · `[~]` en curso · `[x]` hecha (hash de commit) · `[!]` bloqueada · `[-]` descartada
 `[NET]` = requiere red. `[HW]` = requiere hardware real (audio/háptico/pantalla), no verificable en CI.
 
 ## PUNTO DE REANUDACIÓN
 
+> **Rediseño integral (UX/pedagogía/entrenamiento):** completado el 100 % de sus 6 etapas
+> (`R1-01`…`R6-03`); detalle y verificación en `docs/CHECKLIST-REDESENO.md` y `docs/LOG.md`.
+> Cambios en local, sin publicar.
+>
 > **Fase 4 — estado:** cerrada técnicamente y **publicada en GitHub Pages** (P4-001…P4-007);
 > sin release de bundles. Informe en `docs/INFORME-FASE-4.md`; empaquetado en
 > `docs/EMPAQUETADO.md`; mediciones en `docs/MEDICIONES.md`. Host Tauri con audio cpal,

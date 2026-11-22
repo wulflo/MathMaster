@@ -9,7 +9,10 @@
 
 pub mod audio;
 pub mod drill;
+pub mod focus;
 pub mod frames;
+pub mod mitori;
+pub mod mixed;
 pub mod multiplication;
 pub mod pedagogy;
 pub mod platform;
@@ -17,12 +20,16 @@ pub mod progress;
 pub mod review;
 pub mod schedule;
 pub mod session;
+pub mod speed;
 
 pub use audio::{
     AudioError, ClickBuffer, DEFAULT_SAMPLE_RATE, ToneSpec, click_offsets, frame_to_sample,
 };
 pub use drill::{Drill, DrillConfig, DrillError};
+pub use focus::FocusedDrill;
 pub use frames::{FrameError, frames_for_duration};
+pub use mitori::{MitoriConfig, MitoriDrill, MitoriError, format_column_term};
+pub use mixed::{MixedConfig, MixedDrill, MixedError, SignedTerm, TermSign};
 pub use multiplication::{
     MAX_FACTOR_DIGITS, MAX_MUL_LEVEL, MAX_RODS, MIN_MUL_LEVEL, MUL_LEVELS, MulProgress,
     Multiplication, MultiplicationDrill, MultiplicationError, MultiplicationLevel, PartialProduct,
@@ -38,3 +45,4 @@ pub use schedule::{
 pub use session::{
     CaseStat, MAX_SESSIONS, SessionRecord, case_stats, decode_log, encode_log, to_csv,
 };
+pub use speed::{DrillSpeed, MAX_EXPOSURE_MS, MAX_GAP_MS, MIN_EXPOSURE_MS, SpeedError};

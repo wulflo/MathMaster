@@ -39,6 +39,10 @@ pub struct UiStrings {
     pub spanish: String,
     /// Nombre del idioma inglés.
     pub english: String,
+    /// Etiqueta compacta del español en la cabecera.
+    pub lang_es: String,
+    /// Etiqueta compacta del inglés en la cabecera.
+    pub lang_en: String,
     /// Texto de carga inicial.
     pub loading: String,
     /// Etiqueta del enlace al código fuente.
@@ -209,6 +213,196 @@ pub struct UiStrings {
     pub mul_practice_elapsed: String,
     /// Sufijo del nivel mental.
     pub mul_mental: String,
+
+    // --- REDESENO: navegación y cabecera ---
+    /// Etiqueta accesible de la barra de pestañas principales.
+    pub tablist_label: String,
+    /// Pestaña Aprender.
+    pub tab_learn: String,
+    /// Pestaña Laboratorio (soroban libre).
+    pub tab_lab: String,
+    /// Pestaña Entrenamiento.
+    pub tab_train: String,
+    /// Pestaña Progreso.
+    pub tab_progress: String,
+    /// Subsección de fundamentos del soroban.
+    pub sub_fundamentals: String,
+    /// Subsección de multiplicación frontal.
+    pub sub_multiplication: String,
+    /// Subsección de atajos mentales.
+    pub sub_shortcuts: String,
+    /// Subsección de la tabla 大九九.
+    pub sub_table99: String,
+    /// Subsección de ábaco interactivo.
+    pub sub_soroban: String,
+    /// Subsección de demostrador de movimientos.
+    pub sub_movements: String,
+    /// Subsección de Flash Anzan.
+    pub sub_flash: String,
+    /// Subsección de Mitori Anzan.
+    pub sub_mitori: String,
+    /// Subsección de multiplicación por niveles.
+    pub sub_mul_training: String,
+    /// Subsección de entrenamiento dirigido.
+    pub sub_directed: String,
+    /// Subsección de panel de dominio.
+    pub sub_mastery: String,
+    /// Subsección de repaso espaciado.
+    pub sub_review: String,
+    /// Subsección de diagnóstico e historial.
+    pub sub_diagnostics: String,
+    /// Etiqueta accesible de una barra de subpestañas.
+    pub subtablist_label: String,
+    /// Nombre del método de multiplicación frontal.
+    pub mul_method_name: String,
+    /// Cabecera «operación» de las tablas de fórmulas.
+    pub formula_operation: String,
+    /// Cabecera «equivalencia» de las tablas de fórmulas.
+    pub formula_equation: String,
+    /// Cabecera «nota» de las tablas de fórmulas.
+    pub formula_note: String,
+    /// Etiqueta del fundamento matemático de una lección.
+    pub mul_foundation: String,
+    /// Etiqueta de la regla de posicionamiento de varillas.
+    pub mul_positioning: String,
+    /// Etiqueta del procedimiento detallado.
+    pub mul_procedure: String,
+    /// Etiqueta de las trampas habituales.
+    pub mul_pitfalls: String,
+    /// Etiqueta del ejemplo resuelto y comentado.
+    pub mul_annotated: String,
+    /// Leyenda del esquema: barra divisoria.
+    pub diagram_hari: String,
+    /// Leyenda del esquema: cuenta celestial.
+    pub diagram_go_dama: String,
+    /// Leyenda del esquema: cuentas terrestres.
+    pub diagram_ichi_dama: String,
+    /// Leyenda del esquema: punto de unidad.
+    pub diagram_teii_ten: String,
+    /// Leyenda del esquema: movimiento del pulgar.
+    pub diagram_thumb: String,
+    /// Leyenda del esquema: movimiento del índice.
+    pub diagram_index: String,
+    /// Leyenda del esquema: acarreo.
+    pub diagram_carry: String,
+    /// Leyenda del esquema: familia de complementos mixtos.
+    pub diagram_mixed: String,
+    /// Leyenda del esquema: antes de aplicar la regla.
+    pub diagram_before: String,
+    /// Leyenda del esquema: después de aplicar la regla.
+    pub diagram_after: String,
+
+    // --- REDESENO: respuesta ultrarrápida ---
+    /// Interruptor de avance automático al acertar.
+    pub answer_auto_advance: String,
+    /// Pista bajo el campo de respuesta.
+    pub answer_hint: String,
+    /// Acción para pasar al siguiente ejercicio.
+    pub answer_next: String,
+    /// Botón «Ver en el soroban» tras un fallo.
+    pub answer_see_soroban: String,
+    /// Etiqueta del teclado numérico opcional.
+    pub answer_keypad: String,
+    /// Acción de borrar la respuesta escrita.
+    pub answer_clear: String,
+    /// Acción de repetir la misma secuencia.
+    pub answer_repeat: String,
+
+    // --- REDESENO: Flash Anzan ampliado ---
+    /// Texto de la cuenta regresiva de fijación (`{n}`).
+    pub drill_countdown: String,
+    /// Instrucción durante la cuenta regresiva.
+    pub drill_fixation: String,
+    /// Interruptor de operaciones mixtas (sumas y restas).
+    pub drill_mixed: String,
+    /// Etiqueta del tiempo de exposición por término en milisegundos.
+    pub drill_exposure: String,
+    /// Etiqueta del hueco entre términos en milisegundos.
+    pub drill_gap: String,
+    /// Frames equivalentes a la configuración actual (`{n}`).
+    pub drill_frames: String,
+    /// Cadencia en términos por segundo (`{n}`).
+    pub drill_cadence: String,
+    /// Signo menos usado en los términos sustractivos.
+    pub minus_sign: String,
+
+    // --- REDESENO: laboratorio y demostrador ---
+    /// Etiqueta del selector de varillas.
+    pub lab_rods: String,
+    /// Título del demostrador de movimientos.
+    pub demo_title: String,
+    /// Valor inicial de la operación.
+    pub demo_start: String,
+    /// Selector de operación: sumar.
+    pub demo_add: String,
+    /// Selector de operación: restar.
+    pub demo_sub: String,
+    /// Cantidad a sumar o restar.
+    pub demo_amount: String,
+    /// Acción de generar los pasos.
+    pub demo_run: String,
+    /// Plantilla de paso del demostrador (`{n}` de `{total}`).
+    pub demo_step: String,
+    /// Etiqueta de la regla aplicada en un paso.
+    pub demo_rule: String,
+    /// Regla de movimiento directo.
+    pub rule_direct: String,
+    /// Regla de complemento a 5.
+    pub rule_complement5: String,
+    /// Regla de complemento a 10.
+    pub rule_complement10: String,
+    /// Regla de acarreo en cadena.
+    pub rule_carry: String,
+    /// Regla de préstamo en cadena.
+    pub rule_borrow: String,
+    /// Resultado de la operación demonstrada (`{value}`).
+    pub demo_result: String,
+    /// Aviso de operación no válida.
+    pub demo_invalid: String,
+
+    // --- REDESENO: Mitori Anzan ---
+    /// Título del modo Mitori Anzan.
+    pub mitori_title: String,
+    /// Introducción del modo Mitori Anzan.
+    pub mitori_intro: String,
+    /// Etiqueta del número de dígitos por fila.
+    pub mitori_digits: String,
+    /// Etiqueta del número de filas.
+    pub mitori_rows: String,
+    /// Etiqueta del tiempo límite en segundos.
+    pub mitori_limit: String,
+    /// Acción para mostrar la columna.
+    pub mitori_start: String,
+    /// Interruptor de lectura guiada.
+    pub mitori_guided: String,
+    /// Tiempo transcurrido (`{ms}`).
+    pub mitori_timer: String,
+    /// Acción de revelar la siguiente fila.
+    pub mitori_next_row: String,
+    /// Etiqueta del campo de suma de la columna.
+    pub mitori_answer: String,
+
+    // --- REDESENO: entrenamiento dirigido y analítica ---
+    /// Título del entrenamiento dirigido.
+    pub directed_title: String,
+    /// Introducción del entrenamiento dirigido.
+    pub directed_intro: String,
+    /// Caso débil detectado (`{case}`).
+    pub directed_weakest: String,
+    /// Aviso cuando aún no hay datos suficientes.
+    pub directed_no_data: String,
+    /// Título del panel de dominio.
+    pub mastery_title: String,
+    /// Objetivo hacia el siguiente nivel (`{n}`).
+    pub mastery_goal: String,
+    /// Plantilla del estado de repaso de un nivel (`{level}`, `{state}`).
+    pub review_detail: String,
+    /// Acción de lanzar el repaso pendiente.
+    pub review_start: String,
+    /// Título del diagnóstico por regla.
+    pub diagnostics_title: String,
+    /// Título de la tabla de últimas sesiones.
+    pub diagnostics_history: String,
 }
 
 /// Contenido de la sección «Aprender a multiplicar» para un locale.
@@ -221,6 +415,74 @@ pub struct MultiplicationContent {
     pub intro: String,
     /// Lecciones en orden de dificultad.
     pub lessons: Vec<MultiplicationLesson>,
+    /// Manual práctico de fundamentos del soroban (capítulos 1–6).
+    ///
+    /// Vive junto a la multiplicación en el RON de contenido pedagógico para que todo texto
+    /// visible siga residiendo en los cuatro ficheros validados por los tests.
+    pub fundamentals: FundamentalsContent,
+}
+
+/// Manual práctico de fundamentos del soroban y del paso al cálculo mental.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FundamentalsContent {
+    /// Título del manual.
+    pub title: String,
+    /// Introducción del manual.
+    pub intro: String,
+    /// Capítulos en orden de estudio.
+    pub chapters: Vec<FundamentalsChapter>,
+}
+
+/// Un capítulo del manual de fundamentos.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FundamentalsChapter {
+    /// Identificador estable (`C1`…`C6`).
+    pub id: String,
+    /// Título del capítulo.
+    pub title: String,
+    /// Objetivo verificable del capítulo.
+    pub goal: String,
+    /// Secciones que componen el capítulo.
+    pub sections: Vec<FundamentalsSection>,
+}
+
+/// Una sección de un capítulo: prosa, fórmulas, pasos guiados y trampas.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FundamentalsSection {
+    /// Encabezado de la sección.
+    pub heading: String,
+    /// Párrafos explicativos.
+    pub paragraphs: Vec<String>,
+    /// Tabla de fórmulas y sus inversiones, si la sección la tiene.
+    #[serde(default)]
+    pub formulas: Vec<FormulaRow>,
+    /// Procedimiento guiado paso a paso, si aplica.
+    #[serde(default)]
+    pub steps: Vec<String>,
+    /// Errores frecuentes a evitar.
+    #[serde(default)]
+    pub tips: Vec<String>,
+    /// Identificador del esquema vectorial que ilustra la sección, si tiene.
+    ///
+    /// Valores: `anatomy`, `reading`, `fingering`, `complement5`, `complement10`,
+    /// `mixed`, `fading`. La UI decide cómo dibujarlo; el RON sólo elige cuál mostrar.
+    #[serde(default)]
+    pub diagram: Option<String>,
+}
+
+/// Una fila de una tabla de fórmulas del manual.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FormulaRow {
+    /// Operación que se quiere resolver (`+4`, `−4`, …).
+    pub label: String,
+    /// Equivalencia mecanográfica en el ábaco (`+4 = +5 − 1`).
+    pub equation: String,
+    /// Condición o nota didáctica.
+    pub note: String,
 }
 
 /// Una lección de multiplicación.
@@ -243,6 +505,21 @@ pub struct MultiplicationLesson {
     /// secuencia de productos de la 空盘前乘法.
     #[serde(default = "default_true")]
     pub show_steps: bool,
+    /// Fundamento matemático de la lección.
+    #[serde(default)]
+    pub foundation: String,
+    /// Regla de posicionamiento de varillas (*Teii-hō* / 定位法).
+    #[serde(default)]
+    pub positioning: String,
+    /// Procedimiento detallado paso a paso.
+    #[serde(default)]
+    pub procedure: Vec<String>,
+    /// Trampas habituales: ceros, acarreos cruzados, cero inicial.
+    #[serde(default)]
+    pub pitfalls: Vec<String>,
+    /// Ejemplo resuelto y comentado, línea a línea.
+    #[serde(default)]
+    pub annotated_example: Vec<String>,
 }
 
 /// Valor por defecto de [`MultiplicationLesson::show_steps`].
@@ -449,6 +726,192 @@ mod tests {
                 }
             }
         }
+    }
+
+    /// Cuenta las claves de primer nivel de un RON de textos de UI.
+    ///
+    /// `deny_unknown_fields` ya garantiza que ambos locales tienen exactamente las claves
+    /// del struct; este recuento hace explícita la paridad en el test.
+    fn top_level_keys(source: &str) -> usize {
+        source
+            .lines()
+            .filter(|line| {
+                let trimmed = line.trim_start();
+                line.len() - trimmed.len() == 4
+                    && trimmed
+                        .split(':')
+                        .next()
+                        .is_some_and(|key| key.chars().all(|c| c.is_ascii_lowercase() || c == '_'))
+            })
+            .count()
+    }
+
+    #[test]
+    fn ui_locales_have_exactly_the_same_keys() {
+        assert_eq!(top_level_keys(ES_RON), top_level_keys(EN_RON));
+        for locale in [Locale::Es, Locale::En] {
+            let strings = load(locale);
+            assert!(strings.is_ok(), "el locale {} debe parsear", locale.code());
+            if let Ok(strings) = strings {
+                assert!(!strings.tablist_label.trim().is_empty());
+                assert!(!strings.answer_auto_advance.trim().is_empty());
+                assert!(strings.drill_countdown.contains("{n}"));
+                assert!(!strings.accent_names.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn fundamentals_content_parses_with_six_chapters_in_both_locales() {
+        let mut snapshots = Vec::new();
+        for locale in [Locale::Es, Locale::En] {
+            let content = load_multiplication(locale);
+            assert!(
+                content.is_ok(),
+                "los fundamentos de {} deben parsear",
+                locale.code()
+            );
+            if let Ok(content) = content {
+                let manual = &content.fundamentals;
+                assert!(!manual.title.trim().is_empty());
+                assert!(!manual.intro.trim().is_empty());
+                let ids: Vec<&str> = manual
+                    .chapters
+                    .iter()
+                    .map(|chapter| chapter.id.as_str())
+                    .collect();
+                assert_eq!(ids, vec!["C1", "C2", "C3", "C4", "C5", "C6"]);
+                for chapter in &manual.chapters {
+                    assert!(!chapter.title.trim().is_empty());
+                    assert!(!chapter.goal.trim().is_empty());
+                    assert!(!chapter.sections.is_empty());
+                    for section in &chapter.sections {
+                        assert!(!section.heading.trim().is_empty());
+                        assert!(!section.paragraphs.is_empty());
+                        assert!(
+                            section
+                                .paragraphs
+                                .iter()
+                                .all(|text| !text.trim().is_empty())
+                        );
+                        for row in &section.formulas {
+                            assert!(!row.label.trim().is_empty());
+                            assert!(!row.equation.trim().is_empty());
+                            assert!(!row.note.trim().is_empty());
+                        }
+                        assert!(section.steps.iter().all(|text| !text.trim().is_empty()));
+                        assert!(section.tips.iter().all(|text| !text.trim().is_empty()));
+                    }
+                }
+                snapshots.push(
+                    manual
+                        .chapters
+                        .iter()
+                        .map(|chapter| {
+                            (
+                                chapter.id.clone(),
+                                chapter.sections.len(),
+                                chapter
+                                    .sections
+                                    .iter()
+                                    .map(|section| section.formulas.len())
+                                    .collect::<Vec<_>>(),
+                            )
+                        })
+                        .collect::<Vec<_>>(),
+                );
+            }
+        }
+        assert_eq!(snapshots.len(), 2);
+        assert_eq!(snapshots[0], snapshots[1]);
+    }
+
+    #[test]
+    fn sections_reference_known_vector_diagrams_in_both_locales() {
+        let known = [
+            "anatomy",
+            "reading",
+            "fingering",
+            "complement5",
+            "complement10",
+            "mixed",
+            "fading",
+        ];
+        let mut shapes = Vec::new();
+        for locale in [Locale::Es, Locale::En] {
+            let content = load_multiplication(locale);
+            assert!(content.is_ok());
+            if let Ok(content) = content {
+                let mut codes = Vec::new();
+                for chapter in &content.fundamentals.chapters {
+                    for section in &chapter.sections {
+                        if let Some(diagram) = &section.diagram {
+                            assert!(
+                                known.contains(&diagram.as_str()),
+                                "diagrama desconocido: {diagram}"
+                            );
+                            codes.push(diagram.clone());
+                        }
+                    }
+                }
+                assert_eq!(codes.len(), known.len());
+                shapes.push(codes);
+            }
+        }
+        assert_eq!(shapes.len(), 2);
+        assert_eq!(shapes[0], shapes[1]);
+    }
+
+    #[test]
+    fn lessons_include_deep_pedagogy_in_both_locales() {
+        let mut shapes = Vec::new();
+        for locale in [Locale::Es, Locale::En] {
+            let content = load_multiplication(locale);
+            assert!(content.is_ok());
+            if let Ok(content) = content {
+                let mut shape = Vec::new();
+                for lesson in &content.lessons {
+                    assert!(
+                        !lesson.foundation.trim().is_empty(),
+                        "{} sin fundamento",
+                        lesson.id
+                    );
+                    assert!(
+                        !lesson.positioning.trim().is_empty(),
+                        "{} sin Teii-hō",
+                        lesson.id
+                    );
+                    assert!(
+                        !lesson.procedure.is_empty(),
+                        "{} sin procedimiento",
+                        lesson.id
+                    );
+                    assert!(!lesson.pitfalls.is_empty(), "{} sin trampas", lesson.id);
+                    assert!(
+                        !lesson.annotated_example.is_empty(),
+                        "{} sin ejemplo comentado",
+                        lesson.id
+                    );
+                    assert!(lesson.procedure.iter().all(|text| !text.trim().is_empty()));
+                    assert!(lesson.pitfalls.iter().all(|text| !text.trim().is_empty()));
+                    assert!(
+                        lesson
+                            .annotated_example
+                            .iter()
+                            .all(|text| !text.trim().is_empty())
+                    );
+                    shape.push((
+                        lesson.id.clone(),
+                        lesson.procedure.len(),
+                        lesson.pitfalls.len(),
+                        lesson.annotated_example.len(),
+                    ));
+                }
+                shapes.push(shape);
+            }
+        }
+        assert_eq!(shapes.len(), 2);
+        assert_eq!(shapes[0], shapes[1]);
     }
 
     #[test]

@@ -150,7 +150,7 @@ impl Drill {
 }
 
 /// Normaliza la semilla para que el generador nunca se quede en cero.
-const fn normalize_seed(seed: u64) -> u64 {
+pub(crate) const fn normalize_seed(seed: u64) -> u64 {
     if seed == 0 {
         0x9E37_79B9_7F4A_7C15
     } else {
@@ -159,7 +159,7 @@ const fn normalize_seed(seed: u64) -> u64 {
 }
 
 /// Xorshift64*: rápido, determinista y suficiente para generar ejercicios.
-const fn next_u64(state: &mut u64) -> u64 {
+pub(crate) const fn next_u64(state: &mut u64) -> u64 {
     let mut value = *state;
     value ^= value >> 12;
     value ^= value << 25;

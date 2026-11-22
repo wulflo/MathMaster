@@ -38,7 +38,7 @@ pub const SCRIPT: &str = r#"
     let start = null;
     for (let i = 0; i < 400 && !start; i++) {
       await sleep(25);
-      start = document.querySelector(".anzan-start");
+      start = document.querySelector(".anzan-drill .anzan-start");
     }
     if (!start) throw new Error("la UI no cargó el botón de inicio");
 
@@ -52,7 +52,7 @@ pub const SCRIPT: &str = r#"
     let form = null;
     for (let i = 0; i < 800; i++) {
       await sleep(25);
-      form = document.querySelector(".anzan-answer");
+      form = document.querySelector(".anzan-drill .anzan-answer");
       if (form && !form.hidden) break;
     }
     if (!form || form.hidden) throw new Error("el drill no terminó a tiempo");
@@ -74,7 +74,7 @@ pub const SCRIPT: &str = r#"
     out.drill.telemetry = telemetry ? telemetry.textContent.trim() : "";
     out.drill.native = native ? native.textContent.trim() : "";
     out.drill.result = result ? result.textContent.trim() : "";
-    out.drill.sessionRows = document.querySelectorAll(".anzan-session-list li").length;
+    out.drill.sessionRows = document.querySelectorAll(".anzan-drill .anzan-session-list li").length;
 
     // WebKit suspende rAF en ventanas sin foco: se espera a que el lanzador active
     // la ventana (xdotool) antes de medir.

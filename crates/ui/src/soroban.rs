@@ -40,7 +40,13 @@ fn bead_rect(rect: anzan_core::geometry::Rect) -> (f32, f32, f32, f32) {
 
 /// Panel interactivo del soroban.
 #[component]
-pub fn SorobanBoard(strings: UiStrings) -> impl IntoView {
+pub fn SorobanBoard(
+    strings: UiStrings,
+    /// Número de varillas (4..=13); por defecto las ocho históricas.
+    #[prop(default = DEFAULT_RODS)]
+    rods: usize,
+) -> impl IntoView {
+    let rods = rods.clamp(4, 13);
     let UiStrings {
         soroban_label,
         value_label,
@@ -57,11 +63,11 @@ pub fn SorobanBoard(strings: UiStrings) -> impl IntoView {
         ..
     } = strings;
 
-    let soroban = RwSignal::new(Soroban::default());
+    let soroban = RwSignal::new(Soroban::from_value(0, rods).unwrap_or_default());
     let stage = RwSignal::new(FadeStage::Full);
     let show = RwSignal::new(true);
     let pressed = RwSignal::new(None::<Touch>);
-    let geometry = SorobanGeometry::for_rods(DEFAULT_RODS);
+    let geometry = SorobanGeometry::for_rods(rods);
 
     let apply_touch = Callback::new(move |touch: Touch| {
         pressed.set(Some(touch));
@@ -73,7 +79,7 @@ pub fn SorobanBoard(strings: UiStrings) -> impl IntoView {
     let title = StoredValue::new(soroban_label);
     let bead_label = title;
 
-    let rod_lines = (0..DEFAULT_RODS)
+    let rod_lines = (0..rods)
         .rev()
         .filter_map(|rod| {
             let rect = geometry.rod_rect(rod)?;
@@ -100,7 +106,7 @@ pub fn SorobanBoard(strings: UiStrings) -> impl IntoView {
         (BEAM_HALF_GAP * 2.0) * 100.0,
     );
 
-    let unit_marks = (0..DEFAULT_RODS)
+    let unit_marks = (0..rods)
         .rev()
         .filter_map(|rod| {
             let rect = geometry.rod_rect(rod)?;
@@ -118,7 +124,7 @@ pub fn SorobanBoard(strings: UiStrings) -> impl IntoView {
         })
         .collect_view();
 
-    let beads = (0..DEFAULT_RODS)
+    let beads = (0..rods)
         .rev()
         .flat_map(|rod| {
             SLOTS.into_iter().filter_map(move |slot| {
@@ -255,7 +261,7 @@ pub fn SorobanBoard(strings: UiStrings) -> impl IntoView {
                 <button
                     type="button"
                     class="anzan-reset"
-                    on:click=move |_| soroban.set(Soroban::default())
+                    on:click=move |_| soroban.set(Soroban::from_value(0, rods).unwrap_or_default())
                 >
                     {reset_label}
                 </button>

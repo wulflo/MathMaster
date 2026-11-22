@@ -18,6 +18,23 @@
                 caption: "2 × 4 = 08",
                 conclusion: "El producto es 8, pero se registra 08: el 0 ocupa la varilla de las decenas y el 8 la de las unidades.",
             ),
+            foundation: "El producto de dos cifras es una suma repetida que la tabla 大九九 (9×9) automatiza. El registro de dos cifras es una convención posicional: cada producto ocupa exactamente dos varillas consecutivas, incluso cuando su decena es cero.",
+            positioning: "Teii-hō / 定位法: para un factor de m cifras y otro de n cifras se preparan m + n varillas; si la cifra más alta del resultado queda vacía se aplica 前空减一, «suma las cifras y resta una». Aquí m = n = 1, así que se usan dos varillas.",
+            procedure: [
+                "Elige el par de cifras en la tabla 大九九 y recupera el producto sin contar.",
+                "Escribe siempre dos cifras: si el producto es menor que 10, antepón un cero.",
+                "Coloca la decena en la varilla de la izquierda y la unidad en la de la derecha.",
+                "Comprueba que la varilla de las decenas existe aunque su cuenta esté en cero.",
+            ],
+            pitfalls: [
+                "Olvidar el cero inicial en 01..09: desplaza todas las posiciones siguientes.",
+                "Confundir la tabla pequeña (5×5) con la 大九九 (9×9): esta última incluye productos como 7×8 = 56.",
+            ],
+            annotated_example: [
+                "2×4: la tabla da 08, no 8.",
+                "Varilla 1 (decenas): 0. Varilla 0 (unidades): 8.",
+                "Lectura final: 08 = 8, con la posición ya reservada para ampliar el cálculo.",
+            ],
         ),
         (
             id: "M1",
@@ -35,6 +52,23 @@
                 caption: "7 × 8 = 56",
                 conclusion: "56 ocupa dos varillas: 5 en las decenas y 6 en las unidades. No hay nada más que sumar.",
             ),
+            foundation: "No hay acumulado previo porque el ábaco está vacío (空盘). El producto se escribe directamente y su valor de lugar viene dado por la posición de las dos varillas elegidas.",
+            positioning: "Teii-hō: m + n = 1 + 1 = 2 varillas. El producto de dos cifras comienza en la varilla de las decenas; si la primera cifra es cero se conserva la varilla vacía (前空减一 sólo se aplica al resultado final).",
+            procedure: [
+                "Deja el ábaco en cero y sitúa la varilla de unidades a la derecha.",
+                "Formula el producto de las dos cifras con la tabla 大九九.",
+                "Registra las decenas en la varilla de la izquierda y las unidades en la de la derecha.",
+                "Lee el ábaco de izquierda a derecha sin mover las cuentas ya puestas.",
+            ],
+            pitfalls: [
+                "Registrar 56 como 5 en unidades y 6 en decenas (orden invertido).",
+                "Mover el punto de unidad al cambiar de lección: la derecha siempre son unidades.",
+            ],
+            annotated_example: [
+                "7×8 = 56 según la tabla.",
+                "Decenas: 5. Unidades: 6.",
+                "El ábaco vacío queda con 56; no hay productos parciales adicionales.",
+            ],
         ),
         (
             id: "M2",
@@ -52,6 +86,23 @@
                 caption: "28 × 3 = 84",
                 conclusion: "06 y 24 se superponen en una varilla: el resultado es 84.",
             ),
+            foundation: "Distributividad: 3×(20+8) = 3×20 + 3×8. Cada producto parcial se desplaza una varilla hacia la derecha porque su factor del multiplicando pesa diez veces menos que el anterior.",
+            positioning: "Teii-hō: m + n = 2 + 1 = 3 varillas. El primer producto 06 arranca en varillas 2 y 1; el siguiente, 24, arranca una varilla más a la derecha (1 y 0) y suma sobre lo anterior.",
+            procedure: [
+                "Lee el multiplicando de izquierda a derecha: primero el 2, después el 8.",
+                "Registra 3×2 = 06 en las dos varillas de la izquierda.",
+                "Registra 3×8 = 24 desplazado una varilla a la derecha, sumando sin borrar.",
+                "Si una columna supera 9, lleva la decena a la varilla de la izquierda.",
+            ],
+            pitfalls: [
+                "Olvidar que 3×2 son 06 y no 6: sin el cero el 24 queda mal colocado.",
+                "Borrar el primer producto antes de sumar el segundo.",
+            ],
+            annotated_example: [
+                "Paso 1: 3×2 = 06 → decenas 0, unidades 6.",
+                "Paso 2: 3×8 = 24 → se coloca una varilla a la derecha y se suma 6+4 = 10.",
+                "El acarreo deja 84: 0+2 y el 1 del 10 se integran en la varilla superior.",
+            ],
         ),
         (
             id: "M3",
@@ -69,6 +120,23 @@
                 caption: "7 × 34 = 238",
                 conclusion: "3×7 = 21 y 4×7 = 28; el segundo producto empieza en la varilla de las unidades del primero.",
             ),
+            foundation: "La multiplicidad es conmutativa en el resultado, pero no en el algoritmo: 34×7 = 7×30 + 7×4. El orden de barrido lo fija el multiplicador porque sus cifras determinan el desplazamiento de cada pasada.",
+            positioning: "Teii-hō: m + n = 1 + 2 = 3 varillas. La pasada del 3 empieza en las varillas 2 y 1; la del 4, en las varillas 1 y 0; el resultado 238 ocupa tres varillas.",
+            procedure: [
+                "Señala la decena del multiplicador (3) y calcula 3×7 = 21.",
+                "Coloca 21 en las dos varillas de la izquierda.",
+                "Señala la unidad (4), calcula 4×7 = 28 y colócalo desplazado una varilla a la derecha.",
+                "Suma los solapamientos y lee 238.",
+            ],
+            pitfalls: [
+                "Empezar por la unidad del multiplicador: el orden de las pasadas cambia el desplazamiento.",
+                "Creer que 3×7 = 21 debe escribirse como 021: son dos cifras, no tres.",
+            ],
+            annotated_example: [
+                "Pasada del 3: 21 en varillas 2–1.",
+                "Pasada del 4: 28 en varillas 1–0; 1+2 = 3 en la varilla compartida.",
+                "Resultado: 2 · 3 · 8 = 238.",
+            ],
         ),
         (
             id: "M4",
@@ -86,6 +154,23 @@
                 caption: "23 × 45 = 1035",
                 conclusion: "08, 12, 10 y 15 colocados por valor de lugar dan 1035.",
             ),
+            foundation: "Se aplica la distributividad doble: (20+3)×(40+5) = 20×40 + 20×5 + 3×40 + 3×5. Los cuatro productos se acumulan en sus varillas correspondientes.",
+            positioning: "Teii-hō: m + n = 2 + 2 = 4 varillas. Cada pasada del multiplicador comienza una varilla a la derecha de la anterior; dentro de una pasada, cada cifra del multiplicando avanza otra varilla.",
+            procedure: [
+                "Barre el 23 con el 4: registra 08 y después 12 desplazado una varilla.",
+                "Barre el 23 con el 5: registra 10 y después 15 una varilla más a la derecha.",
+                "Suma las cuatro contribuciones en cada varilla, llevando los excesos a la izquierda.",
+                "Lee el resultado de izquierda a derecha: 1035.",
+            ],
+            pitfalls: [
+                "Los acarreos cruzados: una columna que pasa de 9 debe llevar a la varilla vecina antes de continuar.",
+                "Olvidar los ceros intermedios de 08 y 10, que dejan varillas vacías con valor posicional.",
+            ],
+            annotated_example: [
+                "4×2 = 08 y 4×3 = 12: primera pasada.",
+                "5×2 = 10 y 5×3 = 15: segunda pasada, desplazada una varilla.",
+                "Solapamientos resueltos de derecha a izquierda: 10 · 35 = 1035.",
+            ],
         ),
         (
             id: "M5",
@@ -103,6 +188,23 @@
                 caption: "213 × 32 = 6816",
                 conclusion: "Las seis sumas parciales se acumulan sin borrar nada: 6816.",
             ),
+            foundation: "El mismo algoritmo que M4 con una cifra más: 213×32 = 213×30 + 213×2. Cada pasada son tres productos de dos cifras, seis en total.",
+            positioning: "Teii-hō: m + n = 3 + 2 = 5 varillas, reducidas a 4 por 前空减一 si la más alta queda vacía. Primera pasada desde la varilla 4, segunda desde la 3.",
+            procedure: [
+                "Con el 3: 3×2 = 06, 3×1 = 03, 3×3 = 09, cada uno una varilla a la derecha.",
+                "Con el 2: 2×2 = 04, 2×1 = 02, 2×3 = 06, empezando una varilla más a la derecha.",
+                "Resuelve los acarreos de derecha a izquierda antes de leer.",
+                "Comprueba que la varilla de las decenas de millar quedó vacía y aplica 前空减一.",
+            ],
+            pitfalls: [
+                "Perder el orden dentro de una pasada: el 3 del 213 va después del 1.",
+                "Confundir el desplazamiento entre pasadas con el desplazamiento dentro de una pasada.",
+            ],
+            annotated_example: [
+                "Primera pasada: 06 · 03 · 09.",
+                "Segunda pasada: 04 · 02 · 06, desplazada una varilla.",
+                "Suma con acarreos: 6816.",
+            ],
         ),
         (
             id: "M6",
@@ -120,6 +222,24 @@
                 caption: "213 × 324 = 69012",
                 conclusion: "Nueve productos, seis varillas y un cero intermedio: el resultado es 69012.",
             ),
+            foundation: "La generalización del algoritmo: cada cifra del multiplicador recorre cada cifra del multiplicando, con desplazamiento posicional por pasada y por cifra. Es distributividad aplicada tres veces.",
+            positioning: "Teii-hō: m + n = 3 + 3 = 6 varillas preparadas; 前空减一 reduce el resultado a cinco cifras cuando la varilla más alta queda en cero. El punto de unidad se fija antes de empezar.",
+            procedure: [
+                "Pasada del 3: productos 3×213 con registro de dos cifras cada uno.",
+                "Pasada del 2: misma secuencia desplazada una varilla a la derecha.",
+                "Pasada del 4: misma secuencia desplazada otra varilla.",
+                "Suma y lleva de derecha a izquierda; vigila el cero intermedio del resultado.",
+            ],
+            pitfalls: [
+                "Un cero en el multiplicando genera 00: hay que registrarlo para no desplazar las pasadas siguientes.",
+                "Acarreos cruzados entre pasadas; resuélvelos siempre de derecha a izquierda.",
+                "Olvidar 前空减一 al leer seis varillas con la primera vacía.",
+            ],
+            annotated_example: [
+                "Tres pasadas de tres productos: 06·03·09, 04·02·06, 08·04·12.",
+                "Los solapamientos se suman sin borrar y se llevan hacia la izquierda.",
+                "Lectura con cero intermedio: 69012.",
+            ],
         ),
         (
             id: "M7",
@@ -137,6 +257,23 @@
                 caption: "23 × 45 = 1035, sin ábaco",
                 conclusion: "Sin ábaco: 08, 12, 10 y 15 colocados por posición; el acumulado final es 1035.",
             ),
+            foundation: "El Anzan mental es la internalización del procedimiento físico: se conserva la secuencia y el valor de lugar, no una imagen fotográfica de las cuentas.",
+            positioning: "Teii-hō se mantiene como estructura mental: m + n varillas imaginarias y la regla 前空减一 para el resultado final.",
+            procedure: [
+                "Imagina las varillas vacías y fija el punto de unidad.",
+                "Recita los productos en el mismo orden que en el ábaco físico.",
+                "Sostiene el acumulado parcial y suma cada producto en su posición mental.",
+                "Lee el resultado final y compruébalo con el ábaco antes de seguir.",
+            ],
+            pitfalls: [
+                "Calcular en horizontal en vez de mantener el valor de lugar: es el bloqueo visual más común.",
+                "Saltarse el registro de dos cifras al visualizar los productos.",
+            ],
+            annotated_example: [
+                "23×45: secuencia mental 08 · 12 · 10 · 15.",
+                "Acumulado por posiciones: 10 · 35.",
+                "Resultado: 1035, verificado después en el ábaco.",
+            ],
             show_steps: false,
         ),
         (
@@ -155,6 +292,23 @@
                 caption: "12 × 14 = 100 + 60 + 8 = 168",
                 conclusion: "El atajo sólo vale si ambos factores están entre 11 y 19; si no, se usa la 空盘前乘法.",
             ),
+            foundation: "Expansión binomial de (10+a)(10+b). El término 100 es fijo, 10(a+b) ocupa las decenas y ab las unidades, con acarreo si ab ≥ 10.",
+            positioning: "Teii-hō: el resultado tiene tres varillas (centenas, decenas, unidades) porque ambas decenas son 1. Se fija el 100 en la varilla de las centenas antes de sumar.",
+            procedure: [
+                "Comprueba la condición: ambos factores entre 11 y 19.",
+                "Suma las unidades a+b y multiplica por 10.",
+                "Multiplica las unidades a×b y suma los tres términos.",
+                "Si a×b tiene dos cifras, lleva su decena a la columna anterior.",
+            ],
+            pitfalls: [
+                "Aplicarlo a 21×13: la decena del primer factor no es 1.",
+                "Olvidar el acarreo cuando el producto de las unidades supera 9.",
+            ],
+            annotated_example: [
+                "12×14: a=2, b=4.",
+                "100 + 10×6 + 8 = 100 + 60 + 8.",
+                "Resultado 168, con las unidades 8 y las decenas 6.",
+            ],
             show_steps: false,
         ),
         (
@@ -173,6 +327,23 @@
                 caption: "4 × 5 = 20 y 3 × 7 = 21 → 2021",
                 conclusion: "Si las unidades no suman 10, el atajo no aplica.",
             ),
+            foundation: "Identidad (10a+b)(10a+c) = 100a(a+1) + bc cuando b+c = 10: el término central 10a(b+c) se convierte en 100a.",
+            positioning: "Teii-hō: el resultado se reparte en dos bloques de dos cifras; a(a+1) ocupa las dos varillas altas y bc las dos bajas, con dos cifras siempre.",
+            procedure: [
+                "Verifica que las decenas coinciden y que las unidades suman 10.",
+                "Calcula a(a+1) y escríbelo como parte alta.",
+                "Calcula b×c con dos cifras y pégalo como parte baja.",
+                "Comprueba el resultado con el método general si dudas.",
+            ],
+            pitfalls: [
+                "Escribir 3×7 = 21 con una sola cifra cuando el producto fuera menor que 10.",
+                "Usar el atajo con unidades que suman 9 u 11.",
+            ],
+            annotated_example: [
+                "43×47: a=4, b=3, c=7.",
+                "4×5 = 20 (parte alta); 3×7 = 21 (parte baja).",
+                "Resultado: 2021.",
+            ],
             show_steps: false,
         ),
         (
@@ -191,6 +362,23 @@
                 caption: "3 × 7 + 4 = 25 y 4² = 16 → 2516",
                 conclusion: "Con unidades distintas el atajo no aplica.",
             ),
+            foundation: "Identidad (10a+c)(10b+c) = 100(ab+c) + c² cuando a+b = 10. Es el reflejo del atajo anterior con el papel de decenas y unidades intercambiado.",
+            positioning: "Teii-hō: dos bloques de dos cifras; ab+c en las varillas altas y c² en las bajas, registrado siempre con dos cifras.",
+            procedure: [
+                "Comprueba que las unidades coinciden y que las decenas suman 10.",
+                "Calcula a×b + c para la parte alta.",
+                "Calcula c² con dos cifras para la parte baja.",
+                "Concatena ambos bloques y verifica con el método general.",
+            ],
+            pitfalls: [
+                "Olvidar sumar c al producto de las decenas.",
+                "Registrar c² sin el cero inicial cuando c² < 10.",
+            ],
+            annotated_example: [
+                "34×74: a=3, b=7, c=4.",
+                "3×7+4 = 25; 4² = 16.",
+                "Resultado: 2516.",
+            ],
             show_steps: false,
         ),
         (
@@ -209,7 +397,241 @@
                 caption: "738 × 96 = 73 800 − 2 952 = 70 848",
                 conclusion: "El atajo es una resta; si el complemento es grande, conviene el método general.",
             ),
+            foundation: "Propiedad distributiva de la resta: A×(B−d) = A·B − A·d. El complemento d = 100−B es pequeño, así que A·d es un cálculo corto.",
+            positioning: "Teii-hō: correr A dos varillas equivale a multiplicar por 100; la resta se alinea por el punto de unidad y puede requerir préstamo en cadena.",
+            procedure: [
+                "Calcula el complemento d del factor cercano a 100.",
+                "Escribe A·100 desplazando A dos lugares a la izquierda.",
+                "Calcula A·d y réstalo alineado por el punto de unidad.",
+                "Resuelve los préstamos de derecha a izquierda y lee el resultado.",
+            ],
+            pitfalls: [
+                "Restar A·d desalineado: el error se multiplica por diez.",
+                "Usar el atajo cuando d es grande; entonces el método general es más seguro.",
+            ],
+            annotated_example: [
+                "738×96: d = 4.",
+                "738·100 = 73 800; 738×4 = 2 952.",
+                "73 800 − 2 952 = 70 848.",
+            ],
             show_steps: false,
         ),
     ],
+    fundamentals: (
+        title: "Fundamentos del soroban",
+        intro: "Seis capítulos para dominar el ábaco antes de acelerar: anatomía, digitación, complementos, acarreos y el desvanecimiento hacia el cálculo mental.",
+        chapters: [
+            (
+                id: "C1",
+                title: "Capítulo 1 — Anatomía y lectura",
+                goal: "Reconocer cada parte del ábaco y leer un número sin contar las cuentas una por una.",
+                sections: [
+                    (
+                        heading: "El marco y la barra divisoria (hari)",
+                        diagram: Some("anatomy"),
+                        paragraphs: [
+                            "El soroban es un marco rectangular con varillas verticales y una barra horizontal llamada hari que separa las cuentas celestiales de las terrestres.",
+                            "Sólo las cuentas que tocan el hari cuentan. Las demás están en reposo y valen cero, aunque estén visualmente cerca de la barra.",
+                            "Cada varilla representa una cifra decimal. La varilla de la derecha es la de las unidades y se identifica con un punto de unidad (teii-ten).",
+                        ],
+                        steps: [
+                            "Sitúa el marco plano sobre la mesa y comprueba que el hari queda horizontal.",
+                            "Localiza el punto de unidad en la varilla de la derecha.",
+                            "Comprueba que todas las cuentas están separadas del hari: el ábaco está en cero.",
+                        ],
+                    ),
+                    (
+                        heading: "Go-dama e ichi-dama",
+                        diagram: Some("reading"),
+                        paragraphs: [
+                            "Encima del hari hay una cuenta celestial (go-dama, valor 5); debajo hay cuatro cuentas terrestres (ichi-dama, valor 1 cada una).",
+                            "Una varilla vale de 0 a 9: 0 si nada toca el hari, 1–4 según las terrestres subidas, 5 si sólo baja la celestial y 6–9 si además suben terrestres.",
+                            "La lectura debe ser instantánea: se reconoce la forma del 5 más el resto, no se cuentan las cuentas una por una.",
+                        ],
+                        tips: [
+                            "No inclines el ábaco: las cuentas deben quedar quietas contra el hari o contra el marco.",
+                            "Entrena la lectura de 5, 6, 7, 8 y 9 antes de cualquier ejercicio de suma.",
+                        ],
+                    ),
+                    (
+                        heading: "Teii-ten y limpieza (go-hasan)",
+                        paragraphs: [
+                            "El teii-ten es el punto de unidad: ancla el valor de lugar. Si se pierde, un 3 puede valer 30 o 300 sin que nadie lo note.",
+                            "La limpieza go-hasan consiste en apartar del hari la celestial con el índice y las terrestres con el pulgar, barriendo de izquierda a derecha.",
+                            "Se practica hasta que resetear el ábaco sea un gesto único, sin mirar cada varilla.",
+                        ],
+                        steps: [
+                            "Barre con el índice la cuenta celestial de cada varilla hacia arriba.",
+                            "Barre con el pulgar las cuatro terrestres hacia abajo.",
+                            "Verifica de un vistazo que el hari está despejado en toda su longitud.",
+                        ],
+                    ),
+                ],
+            ),
+            (
+                id: "C2",
+                title: "Capítulo 2 — Digitación ortodoxa",
+                goal: "Mover las cuentas con el mínimo gesto y crear memoria muscular estable.",
+                sections: [
+                    (
+                        heading: "Pulgar e índice, y sólo ellos",
+                        diagram: Some("fingering"),
+                        paragraphs: [
+                            "El pulgar sube las cuentas terrestres hacia el hari; el índice las baja y mueve la cuenta celestial en ambos sentidos.",
+                            "Los demás dedos no tocan las cuentas: se usan para estabilizar la muñeca y el marco.",
+                            "La yema apenas roza la cuenta; un gesto amplio y continuo es más rápido y más preciso que varios golpes cortos.",
+                        ],
+                        steps: [
+                            "Apoya la mano con la muñeca floja y los dedos curvados.",
+                            "Sube una terrestre con el pulgar y bájala con el índice, sin mover el resto de la mano.",
+                            "Baja la celestial con el índice y súbela con el índice, desde el lado del hari.",
+                        ],
+                        tips: [
+                            "Si usas los dos dedos a la vez para una sola cuenta, perderás velocidad al pasar a varillas vecinas.",
+                            "Practica la digitación en blanco, sin mirar, antes de añadir velocidad.",
+                        ],
+                    ),
+                ],
+            ),
+            (
+                id: "C3",
+                title: "Capítulo 3 — Movimiento directo y complementos a 5",
+                goal: "Dominar los amigos pequeños y sus inversiones en la resta.",
+                sections: [
+                    (
+                        heading: "Cuándo hace falta el amigo pequeño",
+                        diagram: Some("complement5"),
+                        paragraphs: [
+                            "El movimiento directo basta cuando las terrestres disponibles suman lo que hay que añadir sin pasar de 4.",
+                            "Cuando las terrestres libres no bastan, se baja la celestial (valor 5) y se devuelve la diferencia con las terrestres: ese es el complemento a 5.",
+                            "En la resta se hace el camino inverso: se sube la celestial y se añaden terrestres para compensar.",
+                        ],
+                        formulas: [
+                            (label: "+4", equation: "+4 = +5 − 1", note: "Baja la celestial y baja una terrestre."),
+                            (label: "+3", equation: "+3 = +5 − 2", note: "Baja la celestial y baja dos terrestres."),
+                            (label: "+2", equation: "+2 = +5 − 3", note: "Baja la celestial y baja tres terrestres."),
+                            (label: "+1", equation: "+1 = +5 − 4", note: "Baja la celestial y baja cuatro terrestres."),
+                            (label: "−4", equation: "−4 = −5 + 1", note: "Sube la celestial y sube una terrestre."),
+                            (label: "−3", equation: "−3 = −5 + 2", note: "Sube la celestial y sube dos terrestres."),
+                            (label: "−2", equation: "−2 = −5 + 3", note: "Sube la celestial y sube tres terrestres."),
+                            (label: "−1", equation: "−1 = −5 + 4", note: "Sube la celestial y sube cuatro terrestres."),
+                        ],
+                        steps: [
+                            "Mira sólo la varilla implicada y cuenta las terrestres libres.",
+                            "Si faltan, aplica la fórmula del amigo pequeño de la tabla.",
+                            "Ejecuta primero el movimiento de la celestial y después la compensación.",
+                            "Comprueba la nueva cifra de un vistazo antes de pasar a otra varilla.",
+                        ],
+                        tips: [
+                            "4+1 requiere complemento a 5: el error típico es creer que es movimiento directo.",
+                            "No mires la tabla mientras ejecutes: memorízala como parejas 1↔4 y 2↔3.",
+                        ],
+                    ),
+                ],
+            ),
+            (
+                id: "C4",
+                title: "Capítulo 4 — Complementos a 10 (amigos grandes)",
+                goal: "Resolver desbordes de decena y cadenas de acarreo o préstamo.",
+                sections: [
+                    (
+                        heading: "Cuando la varilla desborda la decena",
+                        diagram: Some("complement10"),
+                        paragraphs: [
+                            "Si la cifra de una varilla más el sumando supera 9, se retira el complemento a 10 en esa varilla y se lleva 1 a la varilla de la izquierda.",
+                            "El complemento a 10 también puede exigir un amigo pequeño dentro de la misma varilla: esa combinación se estudia en el capítulo 5.",
+                            "En la resta, si la cifra no basta, se pide prestado 1 a la varilla de la izquierda y se añade el complemento a 10.",
+                        ],
+                        formulas: [
+                            (label: "+9", equation: "+9 = −1 + 10", note: "Quita 1 y lleva 1."),
+                            (label: "+8", equation: "+8 = −2 + 10", note: "Quita 2 y lleva 1."),
+                            (label: "+7", equation: "+7 = −3 + 10", note: "Quita 3 y lleva 1."),
+                            (label: "+6", equation: "+6 = −4 + 10", note: "Quita 4 y lleva 1."),
+                            (label: "+5", equation: "+5 = −5 + 10", note: "Quita la celestial y lleva 1."),
+                            (label: "+4", equation: "+4 = −6 + 10", note: "Quita 6 y lleva 1."),
+                            (label: "+3", equation: "+3 = −7 + 10", note: "Quita 7 y lleva 1."),
+                            (label: "+2", equation: "+2 = −8 + 10", note: "Quita 8 y lleva 1."),
+                            (label: "+1", equation: "+1 = −9 + 10", note: "Quita 9 y lleva 1."),
+                            (label: "−9", equation: "−9 = +1 − 10", note: "Añade 1 y pide prestado 1."),
+                            (label: "−1", equation: "−1 = +9 − 10", note: "Añade 9 y pide prestado 1."),
+                        ],
+                        steps: [
+                            "Decide primero si la varilla desborda; no toques nada hasta tenerlo claro.",
+                            "Aplica la fórmula del amigo grande en la varilla actual.",
+                            "Lleva 1 a la varilla de la izquierda, o pídelo prestado en una resta.",
+                            "Si la varilla de la izquierda también desborda, repite el proceso: es una cadena.",
+                        ],
+                        tips: [
+                            "99 + 1: la unidad lleva a las decenas y éstas a las centenas; dos acarreos encadenados.",
+                            "1000 − 1: pide prestado a las unidades de millar y propaga el préstamo hasta las unidades.",
+                        ],
+                    ),
+                ],
+            ),
+            (
+                id: "C5",
+                title: "Capítulo 5 — Complementos mixtos (familia)",
+                goal: "Combinar el amigo de 5 y el de 10 cuando no hay suficientes cuentas libres.",
+                sections: [
+                    (
+                        heading: "La familia de siete",
+                        diagram: Some("mixed"),
+                        paragraphs: [
+                            "Cuando una varilla no tiene terrestres libres ni celestial disponible, se usan los tres movimientos a la vez: quitar el complemento a 5, bajar la celestial y llevar 1 a la izquierda.",
+                            "Se llama familia porque las cuatro operaciones +6, +7, +8 y +9 comparten la misma estructura: +k = +(k−5) − 5 + 10.",
+                            "La inversión en resta cambia los signos: −k = −(k−5) + 5 − 10, con préstamo a la izquierda.",
+                        ],
+                        formulas: [
+                            (label: "+6", equation: "+6 = +1 − 5 + 10", note: "Sube 1, sube la celestial, lleva 1."),
+                            (label: "+7", equation: "+7 = +2 − 5 + 10", note: "Sube 2, sube la celestial, lleva 1."),
+                            (label: "+8", equation: "+8 = +3 − 5 + 10", note: "Sube 3, sube la celestial, lleva 1."),
+                            (label: "+9", equation: "+9 = +4 − 5 + 10", note: "Sube 4, sube la celestial, lleva 1."),
+                            (label: "−6", equation: "−6 = −1 + 5 − 10", note: "Baja 1, baja la celestial, pide prestado."),
+                            (label: "−7", equation: "−7 = −2 + 5 − 10", note: "Baja 2, baja la celestial, pide prestado."),
+                            (label: "−8", equation: "−8 = −3 + 5 − 10", note: "Baja 3, baja la celestial, pide prestado."),
+                            (label: "−9", equation: "−9 = −4 + 5 − 10", note: "Baja 4, baja la celestial, pide prestado."),
+                        ],
+                        steps: [
+                            "Comprueba que no hay terrestres libres suficientes y que la celestial está ocupada.",
+                            "Aplica la parte del amigo pequeño: +(k−5) o −(k−5).",
+                            "Mueve la celestial en dirección contraria (−5 o +5).",
+                            "Cierra con el acarreo o el préstamo en la varilla vecina.",
+                        ],
+                        tips: [
+                            "El orden de los tres movimientos es libre, pero hazlos siempre en el mismo orden para automatizarlos.",
+                            "Si la varilla vecina no puede prestar, encadena otro complemento a 10.",
+                        ],
+                    ),
+                ],
+            ),
+            (
+                id: "C6",
+                title: "Capítulo 6 — Del ábaco físico al Anzan mental",
+                goal: "Desvanecer el ábaco progresivamente sin perder el valor de lugar.",
+                sections: [
+                    (
+                        heading: "Protocolo de desvanecimiento",
+                        diagram: Some("fading"),
+                        paragraphs: [
+                            "El paso al cálculo mental se hace en cinco etapas: Full (ábaco real), Ghost (cuentas translúcidas), Rods (sólo varillas), UnitMarks (sólo puntos de unidad) y Blank (nada).",
+                            "En cada etapa se mantiene el mismo procedimiento y el mismo ritmo; sólo cambia lo que se ve. Avanza cuando la precisión se mantenga alta durante varias sesiones.",
+                            "La imagen mental debe conservar las varillas y el teii-ten; sin esa estructura los números «flotan» y aparecen bloqueos visuales.",
+                        ],
+                        steps: [
+                            "Full: resuelve con el ábaco hasta que el procedimiento sea automático.",
+                            "Ghost: las cuentas se ven desdibujadas; tú decides su posición.",
+                            "Rods: imagina las cuentas apoyadas en las varillas.",
+                            "UnitMarks: conserva sólo los puntos de unidad como referencia.",
+                            "Blank: ejecuta la secuencia sin ningún soporte visual.",
+                        ],
+                        tips: [
+                            "No calcules en horizontal: la suma tradicional activa otro procedimiento y rompe la imagen del ábaco.",
+                            "Si aparece un bloqueo visual, vuelve una etapa atrás en vez de forzar: la precisión se recupera antes que la velocidad.",
+                            "Corta las sesiones cuando la atención baje; el Anzan se entrena con repeticiones cortas y correctas.",
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    ),
 )

@@ -9,16 +9,28 @@
 
 use crate::storage::{read_key, write_key};
 use anzan_content::{MultiplicationContent, UiStrings};
+use anzan_engine::ProgressState;
 use leptos::prelude::*;
 
+pub mod answer;
 pub mod flash;
+pub mod fundamentals;
+pub mod lab;
 pub mod multiplication;
+pub mod progress_view;
 pub mod soroban;
 mod storage;
+pub mod tabs;
+pub mod training;
 
 pub use flash::FlashAnzan;
-pub use multiplication::MultiplicationLearn;
+pub use fundamentals::FundamentalsView;
+pub use lab::{MovementDemo, SorobanLab};
+pub use multiplication::{MultiplicationLearn, MultiplicationPractice, Table99View};
+pub use progress_view::ProgressPanel;
 pub use soroban::SorobanBoard;
+pub use tabs::Tabs;
+pub use training::{DirectedView, MitoriView};
 
 const STYLE: &str = include_str!("../assets/style.css");
 
@@ -26,8 +38,12 @@ const STYLE: &str = include_str!("../assets/style.css");
 const ACCENT_KEY: &str = "anzan.accent";
 /// Clave propia del tema elegido (`light` u `dark`).
 const THEME_KEY: &str = "anzan.theme";
+/// Clave del progreso compartido con la cabecera.
+const PROGRESS_KEY: &str = "anzan.progress";
 /// Número de acentos de la paleta.
 const ACCENT_COUNT: usize = 10;
+/// Pestaña activa por defecto: Entrenamiento, para exponer los controles de práctica.
+const DEFAULT_MAIN_TAB: usize = 2;
 
 /// Normaliza el valor guardado del acento: fuera de rango o ilegible vuelve a 0.
 fn accent_index(raw: Option<&str>) -> usize {
@@ -77,6 +93,13 @@ fn initial_dark() -> bool {
     stored_theme(read_key(THEME_KEY).as_deref()).unwrap_or_else(system_prefers_dark)
 }
 
+/// Indicador de cabecera: nivel y racha del progreso persistido.
+fn initial_stats() -> (u8, u32) {
+    read_key(PROGRESS_KEY)
+        .and_then(|raw| ProgressState::decode(&raw))
+        .map_or((1, 0), |progress| (progress.level, progress.streak))
+}
+
 /// Aplica el tema al documento para que el CSS lo use en `:root[data-theme]`.
 #[cfg(target_arch = "wasm32")]
 fn apply_theme(dark: bool) {
@@ -92,40 +115,33 @@ fn apply_theme(dark: bool) {
 #[cfg(not(target_arch = "wasm32"))]
 fn apply_theme(_dark: bool) {}
 
-/// Raíz visual de MathMaster.
+/// Cabecera compacta de la aplicación.
 #[component]
-pub fn App(strings: UiStrings, multiplication: MultiplicationContent) -> impl IntoView {
-    let strings_for_board = strings.clone();
-    let strings_for_flash = strings.clone();
-    let strings_for_multiplication = strings.clone();
-    let UiStrings {
-        app_name,
-        kicker,
-        tagline,
-        accent_picker_label,
-        accent_names,
-        theme_label,
-        theme_light,
-        theme_dark,
-        spanish,
-        english,
-        source_label,
-        license_label,
-        separator,
-        ..
-    } = strings;
-
-    let accent = RwSignal::new(initial_accent());
-    let dark = RwSignal::new(initial_dark());
-    apply_theme(dark.get_untracked());
-    let names_for_swatches = accent_names.clone();
-    let picker_for_swatches = accent_picker_label.clone();
+fn AppBar(
+    app_name: String,
+    kicker: String,
+    tagline: String,
+    progress_level: String,
+    progress_streak: String,
+    accent_picker_label: String,
+    accent_names: Vec<String>,
+    theme_label: String,
+    theme_light: String,
+    theme_dark: String,
+    language: String,
+    lang_es: String,
+    lang_en: String,
+    stats: RwSignal<(u8, u32)>,
+    accent: RwSignal<usize>,
+    dark: RwSignal<bool>,
+) -> impl IntoView {
+    let fallback_label = accent_picker_label.clone();
     let swatches = (0..ACCENT_COUNT)
         .map(|index| {
-            let name = names_for_swatches
+            let name = accent_names
                 .get(index)
                 .cloned()
-                .unwrap_or_else(|| format!("{} {}", picker_for_swatches, index + 1));
+                .unwrap_or_else(|| format!("{fallback_label} {}", index + 1));
             view! {
                 <button
                     type="button"
@@ -144,6 +160,8 @@ pub fn App(strings: UiStrings, multiplication: MultiplicationContent) -> impl In
         })
         .collect_view();
 
+    let label_attr = accent_picker_label.clone();
+    let label_text = accent_picker_label;
     let theme_name = move || {
         if dark.get() {
             theme_dark.clone()
@@ -151,12 +169,219 @@ pub fn App(strings: UiStrings, multiplication: MultiplicationContent) -> impl In
             theme_light.clone()
         }
     };
-    let on_theme = move |_| {
-        let next = !dark.get_untracked();
-        dark.set(next);
-        apply_theme(next);
-        write_key(THEME_KEY, if next { "dark" } else { "light" });
-    };
+
+    view! {
+        <header class="anzan-appbar">
+            <div class="anzan-appbar-brand">
+                <p class="anzan-kicker">{kicker}</p>
+                <h1 id="anzan-title">{app_name}</h1>
+                <p class="anzan-tagline">{tagline}</p>
+            </div>
+            <div class="anzan-appbar-live" aria-live="polite">
+                <span class="anzan-live-chip">
+                    <span class="anzan-live-label">{progress_level}</span>
+                    <strong class="anzan-live-value">{stats.get().0}</strong>
+                </span>
+                <span class="anzan-live-chip">
+                    <span class="anzan-live-label">{progress_streak}</span>
+                    <strong class="anzan-live-value">{stats.get().1}</strong>
+                </span>
+            </div>
+            <div class="anzan-appbar-controls">
+                <div class="anzan-accent-picker" role="group" aria-label=label_attr>
+                    <span class="anzan-control-label">{label_text}</span>
+                    <div class="anzan-accent-options">{swatches}</div>
+                </div>
+                <button
+                    type="button"
+                    class="anzan-theme-toggle"
+                    role="switch"
+                    aria-label=theme_label
+                    aria-checked=move || if dark.get() { "true" } else { "false" }
+                    on:click=move |_| {
+                        let next = !dark.get_untracked();
+                        dark.set(next);
+                        apply_theme(next);
+                        write_key(THEME_KEY, if next { "dark" } else { "light" });
+                    }
+                >
+                    {theme_name}
+                </button>
+                <nav class="anzan-lang-compact" aria-label=language>
+                    <a href="?lang=es" hreflang="es">{lang_es}</a>
+                    <a href="?lang=en" hreflang="en">{lang_en}</a>
+                </nav>
+            </div>
+        </header>
+    }
+}
+
+/// Pestañas de aprendizaje: fundamentos, multiplicación, atajos y tabla 大九九.
+#[component]
+fn LearnTabs(strings: UiStrings, multiplication: MultiplicationContent) -> impl IntoView {
+    let selected = RwSignal::new(0usize);
+    let fundamentals = multiplication.fundamentals.clone();
+    let panels = vec![
+        view! {
+            <FundamentalsView strings=strings.clone() content=fundamentals />
+        }
+        .into_any(),
+        view! {
+            <MultiplicationLearn strings=strings.clone() content=multiplication.clone() kind=1 />
+        }
+        .into_any(),
+        view! {
+            <MultiplicationLearn strings=strings.clone() content=multiplication.clone() kind=2 />
+        }
+        .into_any(),
+        view! { <Table99View strings=strings.clone() /> }.into_any(),
+    ];
+    view! {
+        <Tabs
+            id="learn"
+            labels=vec![
+                strings.sub_fundamentals.clone(),
+                strings.sub_multiplication.clone(),
+                strings.sub_shortcuts.clone(),
+                strings.sub_table99.clone(),
+            ]
+            aria_label=strings.subtablist_label
+            selected=selected
+            panels=panels
+        />
+    }
+}
+
+/// Pestañas del laboratorio: ábaco libre y demostrador de movimientos.
+#[component]
+fn LabTabs(
+    strings: UiStrings,
+    selected: RwSignal<usize>,
+    demo_request: RwSignal<Option<(u32, bool, u32)>>,
+) -> impl IntoView {
+    let panels = vec![
+        view! { <SorobanLab strings=strings.clone() /> }.into_any(),
+        view! { <MovementDemo strings=strings.clone() demo_request=demo_request /> }.into_any(),
+    ];
+    view! {
+        <Tabs
+            id="lab"
+            labels=vec![strings.sub_soroban.clone(), strings.sub_movements.clone()]
+            aria_label=strings.subtablist_label
+            selected=selected
+            panels=panels
+        />
+    }
+}
+
+/// Pestañas de entrenamiento: Flash, Mitori, multiplicación y dirigido.
+#[component]
+fn TrainTabs(
+    strings: UiStrings,
+    stats: RwSignal<(u8, u32)>,
+    refresh: RwSignal<u32>,
+    demo_request: RwSignal<Option<(u32, bool, u32)>>,
+) -> impl IntoView {
+    let selected = RwSignal::new(0usize);
+    let panels = vec![
+        view! {
+            <FlashAnzan strings=strings.clone() header_stats=stats refresh=refresh demo_request=demo_request />
+        }
+        .into_any(),
+        view! { <MitoriView strings=strings.clone() demo_request=demo_request /> }.into_any(),
+        view! { <MultiplicationPractice strings=strings.clone() /> }.into_any(),
+        view! { <DirectedView strings=strings.clone() demo_request=demo_request /> }.into_any(),
+    ];
+    view! {
+        <Tabs
+            id="train"
+            labels=vec![
+                strings.sub_flash.clone(),
+                strings.sub_mitori.clone(),
+                strings.sub_mul_training.clone(),
+                strings.sub_directed.clone(),
+            ]
+            aria_label=strings.subtablist_label
+            selected=selected
+            panels=panels
+        />
+    }
+}
+
+/// Pestañas de progreso: dominio, repaso y diagnóstico.
+#[component]
+fn ProgressTabs(strings: UiStrings, refresh: RwSignal<u32>) -> impl IntoView {
+    let selected = RwSignal::new(0usize);
+    let panels = (0..3)
+        .map(|section| {
+            view! { <ProgressPanel strings=strings.clone() refresh=refresh section=section /> }
+                .into_any()
+        })
+        .collect::<Vec<_>>();
+    view! {
+        <Tabs
+            id="progress"
+            labels=vec![
+                strings.sub_mastery.clone(),
+                strings.sub_review.clone(),
+                strings.sub_diagnostics.clone(),
+            ]
+            aria_label=strings.subtablist_label
+            selected=selected
+            panels=panels
+        />
+    }
+}
+
+/// Raíz visual de MathMaster.
+#[component]
+pub fn App(strings: UiStrings, multiplication: MultiplicationContent) -> impl IntoView {
+    let UiStrings {
+        app_name,
+        kicker,
+        tagline,
+        accent_picker_label,
+        accent_names,
+        theme_label,
+        theme_light,
+        theme_dark,
+        language,
+        lang_es,
+        lang_en,
+        progress_level,
+        progress_streak,
+        source_label,
+        license_label,
+        separator,
+        ..
+    } = strings.clone();
+
+    let accent = RwSignal::new(initial_accent());
+    let dark = RwSignal::new(initial_dark());
+    apply_theme(dark.get_untracked());
+
+    let stats = RwSignal::new(initial_stats());
+    let refresh = RwSignal::new(0u32);
+    let main_tab = RwSignal::new(DEFAULT_MAIN_TAB);
+    let lab_tab = RwSignal::new(0usize);
+    let demo_request = RwSignal::new(None::<(u32, bool, u32)>);
+    Effect::new(move || {
+        if demo_request.get().is_some() {
+            main_tab.set(1);
+            lab_tab.set(1);
+        }
+    });
+    let main_panels = vec![
+        view! { <LearnTabs strings=strings.clone() multiplication=multiplication.clone() /> }
+            .into_any(),
+        view! { <LabTabs strings=strings.clone() selected=lab_tab demo_request=demo_request /> }
+            .into_any(),
+        view! {
+            <TrainTabs strings=strings.clone() stats=stats refresh=refresh demo_request=demo_request />
+        }
+        .into_any(),
+        view! { <ProgressTabs strings=strings.clone() refresh=refresh /> }.into_any(),
+    ];
 
     view! {
         <style>{STYLE}</style>
@@ -164,51 +389,50 @@ pub fn App(strings: UiStrings, multiplication: MultiplicationContent) -> impl In
             class="anzan-root"
             style=move || format!("--anzan-accent: var(--anzan-accent-{});", accent.get() + 1)
         >
-            <section class="anzan-card" aria-labelledby="anzan-title">
-                <p class="anzan-kicker">{kicker}</p>
-                <h1 id="anzan-title">{app_name}</h1>
-                <p class="anzan-tagline">{tagline}</p>
-                <div class="anzan-appearance">
-                    <div
-                        class="anzan-accent-picker"
-                        role="group"
-                        aria-label=accent_picker_label.clone()
-                    >
-                        <span class="anzan-control-label">{accent_picker_label.clone()}</span>
-                        <div class="anzan-accent-options">{swatches}</div>
-                    </div>
-                    <div class="anzan-theme-picker" role="group" aria-label=theme_label.clone()>
-                        <span class="anzan-control-label">{theme_label.clone()}</span>
-                        <button
-                            type="button"
-                            class="anzan-theme-toggle"
-                            role="switch"
-                            aria-checked=move || if dark.get() { "true" } else { "false" }
-                            on:click=on_theme
-                        >
-                            {theme_name}
-                        </button>
-                    </div>
-                </div>
-                <SorobanBoard strings=strings_for_board />
-                <MultiplicationLearn
-                    strings=strings_for_multiplication
-                    content=multiplication
+            <div class="anzan-card">
+                <AppBar
+                    app_name=app_name
+                    kicker=kicker
+                    tagline=tagline
+                    progress_level=progress_level
+                    progress_streak=progress_streak
+                    accent_picker_label=accent_picker_label
+                    accent_names=accent_names
+                    theme_label=theme_label
+                    theme_light=theme_light
+                    theme_dark=theme_dark
+                    language=language.clone()
+                    lang_es=lang_es
+                    lang_en=lang_en
+                    stats=stats
+                    accent=accent
+                    dark=dark
                 />
-                <FlashAnzan strings=strings_for_flash />
+                <Tabs
+                    id="main"
+                    labels=vec![
+                        strings.tab_learn.clone(),
+                        strings.tab_lab.clone(),
+                        strings.tab_train.clone(),
+                        strings.tab_progress.clone(),
+                    ]
+                    aria_label=strings.tablist_label.clone()
+                    selected=main_tab
+                    panels=main_panels
+                />
                 <footer class="anzan-footer">
-                    <nav class="anzan-lang" aria-label="Language">
-                        <a href="?lang=es">{spanish}</a>
+                    <nav class="anzan-lang" aria-label=language>
+                        <a href="?lang=es">{strings.spanish.clone()}</a>
                         <span class="anzan-sep">{separator.clone()}</span>
-                        <a href="?lang=en">{english}</a>
+                        <a href="?lang=en">{strings.english.clone()}</a>
                     </nav>
                     <nav class="anzan-links">
                         <a href="https://github.com/wulflo/MathMaster" target="_blank" rel="noreferrer">{source_label}</a>
-                        <span class="anzan-sep">{separator.clone()}</span>
+                        <span class="anzan-sep">{separator}</span>
                         <a href="https://github.com/wulflo/MathMaster/blob/main/LICENSE" target="_blank" rel="noreferrer">{license_label}</a>
                     </nav>
                 </footer>
-            </section>
+            </div>
         </main>
     }
 }

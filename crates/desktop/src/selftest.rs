@@ -28,7 +28,7 @@ pub const SCRIPT: &str = r#"
     let start = null;
     for (let i = 0; i < 400 && !start; i++) {
       await sleep(25);
-      start = document.querySelector('.anzan-start');
+      start = document.querySelector('.anzan-drill .anzan-start');
     }
     if (!start) throw new Error('la UI no cargó el botón de inicio');
     out.audioInfo = await invoke('audio_start');
@@ -37,7 +37,7 @@ pub const SCRIPT: &str = r#"
     let form = null;
     for (let i = 0; i < 600; i++) {
       await sleep(25);
-      form = document.querySelector('.anzan-answer');
+      form = document.querySelector('.anzan-drill .anzan-answer');
       if (form && !form.hidden) break;
     }
     if (!form || form.hidden) throw new Error('el drill no terminó a tiempo');
@@ -60,7 +60,7 @@ pub const SCRIPT: &str = r#"
     out.native = native ? native.textContent.trim() : '';
     out.nativeVisible = !!native && !native.hidden;
     out.audioStats = await invoke('audio_stats');
-    out.sessionRows = document.querySelectorAll('.anzan-session-list li').length;
+    out.sessionRows = document.querySelectorAll('.anzan-drill .anzan-session-list li').length;
     const result = document.querySelector('.anzan-drill-result strong');
     out.result = result ? result.textContent.trim() : '';
     out.ok = true;
