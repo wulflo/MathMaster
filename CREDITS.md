@@ -24,4 +24,5 @@ su procedencia.
 
 ## Dependencias
 
-- La auditoría de licencias se ejecutará con `cargo deny check licenses` (P1-025).
+- Ver [`THIRD_PARTY.md`](THIRD_PARTY.md) para la lista completa de dependencias directas y transitivas con sus licencias.
+- La auditoría de licencias se ejecuta con `cargo deny check licenses` (P1-025), configurada en [`deny.toml`](deny.toml).

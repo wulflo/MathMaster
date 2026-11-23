@@ -135,7 +135,7 @@ Las versiones están fijadas en `Cargo.toml`/`Cargo.lock`; `cargo deny check` ve
 | ALSA (backend de audio de escritorio) | sistema | LGPL-2.1-or-later |
 | Web Audio API | implementación del navegador | Especificación W3C libre de regalías |
 
-Las dependencias transitivas, incluidas sus licencias, se listan con `cargo deny list`; `deny.toml` documenta el pequeño conjunto de crates transitivos sin mantenimiento que actualmente se ignoran con una razón.
+Las dependencias transitivas, incluidas sus licencias, se listan en [`THIRD_PARTY.md`](THIRD_PARTY.md); `deny.toml` documenta el pequeño conjunto de crates transitivos sin mantenimiento que actualmente se ignoran con una razón. La lista se puede regenerar con `cargo deny list`.
 
 ---
 

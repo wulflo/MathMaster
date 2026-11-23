@@ -135,7 +135,7 @@ Versions are pinned in `Cargo.toml`/`Cargo.lock`; `cargo deny check` verifies th
 | ALSA (desktop audio backend) | system | LGPL-2.1-or-later |
 | Web Audio API | browser implementation | W3C royalty-free specification |
 
-Transitive dependencies, including their licenses, are listed by `cargo deny list`; `deny.toml` documents the small set of unmaintained transitive crates that are currently ignored with a reason.
+Transitive dependencies, including their licenses, are listed in [`THIRD_PARTY.md`](THIRD_PARTY.md); `deny.toml` documents the small set of unmaintained transitive crates that are currently ignored with a reason. The list can be regenerated with `cargo deny list`.
 
 ---
 
