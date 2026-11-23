@@ -7,12 +7,9 @@ all-features = true
 [advisories]
 version = 2
 yanked = "warn"
-# `paste` es transitivo de Leptos (server_fn/reactive_graph). No tiene CVE y no hay
-# sustituto directo; se revisará al actualizar Leptos. Sin ignorar la advisories completa.
-ignore = [
-  { id = "RUSTSEC-2024-0436", reason = "paste 1.0.15 transitivo de Leptos; sin CVE y sin upgrade seguro" },
-  { id = "RUSTSEC-2024-0370", reason = "proc-macro-error 1.0.4 transitivo de gtk/glib 0.18 vía Tauri; unmaintained, sin CVE y sin upgrade compatible" },
-]
+# Sin excepciones activas: las advisories ignoradas antes ya no están presentes
+# en el árbol de dependencias (verificado con cargo deny check).
+ignore = []
 
 [licenses]
 version = 2
