@@ -2474,10 +2474,39 @@ h1 {
 }
 
 /* En pantallas estrechas (móvil) solo se muestran las iniciales, y el scrollbar
-   se oculta del todo porque se navega con las flechas del teclado o el tacto. */
+   se oculta del todo porque se navega con las flechas del teclado o el tacto.
+   Debajo de la pestaña seleccionada se lee el nombre completo. */
 @media (max-width: 640px) {
   .anzan-tab-label-full {
-    display: none;
+    /* Etiqueta flotante que solo se muestra en la pestaña activa. */
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    margin-top: 0.35rem;
+    padding: 0.18rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: normal;
+    text-align: center;
+    max-width: 150px;
+    line-height: 1.25;
+    border-radius: 0.5rem;
+    background: var(--anzan-surface);
+    color: var(--anzan-text);
+    border: 1px solid var(--anzan-border);
+    box-shadow: var(--anzan-shadow);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 120ms ease, visibility 120ms ease;
+    z-index: 20;
+    display: block;
+  }
+
+  .anzan-tab.is-active .anzan-tab-label-full {
+    opacity: 1;
+    visibility: visible;
   }
 
   .anzan-tab-label-short {
