@@ -10,7 +10,7 @@
 use std::sync::Arc;
 
 use crate::multiplication::abacus_view;
-use crate::tabs::{PanelBuilder, Tabs};
+use crate::tabs::{PanelBuilder, Tabs, tab_signal};
 use anzan_content::{FormulaRow, FundamentalsContent, FundamentalsSection, UiStrings};
 use anzan_core::Soroban;
 use leptos::prelude::*;
@@ -463,6 +463,7 @@ pub fn FundamentalsView(strings: UiStrings, content: FundamentalsContent) -> imp
         .unzip();
 
     let chapter_shorts = labels.clone();
+    let selected = tab_signal("chapters", labels.len(), 0);
 
     view! {
         <section class="anzan-fundamentals" aria-labelledby="anzan-fundamentals-title">
@@ -475,7 +476,7 @@ pub fn FundamentalsView(strings: UiStrings, content: FundamentalsContent) -> imp
                     id="chapters"
                     labels=labels
                     aria_label=strings.subtablist_label.clone()
-                    selected=RwSignal::new(0usize)
+                    selected=selected
                     panels=panels
                     short_labels=chapter_shorts
                 />

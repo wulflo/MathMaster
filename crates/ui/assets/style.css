@@ -10,7 +10,9 @@
   --anzan-bead-top: #f9fcff;
   --anzan-bead-bottom: #c6d8f2;
   --anzan-bead-edge: rgba(11, 27, 51, 0.22);
-  --anzan-border: rgba(255, 255, 255, 0.72);
+  /* Los bordes y separadores derivan del acento: en claro un blanco translúcido
+     desaparecía sobre las superficies Aero. */
+  --anzan-border: color-mix(in srgb, var(--anzan-accent) 32%, transparent);
   --anzan-accent-1: #1f5fd6; /* azul */
   --anzan-accent-2: #0f766e; /* verde azulado */
   --anzan-accent-3: #6d28d9; /* violeta */
@@ -47,7 +49,7 @@
   --anzan-bead-top: #5b769c;
   --anzan-bead-bottom: #29405f;
   --anzan-bead-edge: rgba(190, 216, 255, 0.4);
-  --anzan-border: rgba(160, 200, 255, 0.24);
+  --anzan-border: color-mix(in srgb, var(--anzan-accent) 26%, transparent);
   --anzan-accent-1: #7db2ff; /* azul */
   --anzan-accent-2: #5eead4; /* verde azulado */
   --anzan-accent-3: #c4b5fd; /* violeta */
@@ -109,6 +111,13 @@ body {
       color-mix(in srgb, var(--anzan-accent) var(--anzan-bg-mix-soft), var(--anzan-bg-3)) 100%
     );
   background-attachment: fixed;
+  /* El acento se fija aquí, así que el borde debe resolverse también aquí para
+     seguir a la muestra elegida y no quedarse con el acento por defecto de `:root`. */
+  --anzan-border: color-mix(in srgb, var(--anzan-accent) 32%, transparent);
+}
+
+:root[data-theme="dark"] .anzan-root {
+  --anzan-border: color-mix(in srgb, var(--anzan-accent) 26%, transparent);
 }
 
 .anzan-card {

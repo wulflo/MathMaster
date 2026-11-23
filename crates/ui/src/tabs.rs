@@ -14,7 +14,35 @@
 
 use std::sync::Arc;
 
+use crate::storage::{read_key, write_key};
 use leptos::prelude::*;
+
+/// Prefijo de las claves donde se recuerda la pestaña activa de cada grupo.
+const TAB_KEY_PREFIX: &str = "anzan.tab.";
+
+/// Clave de persistencia de un grupo de pestañas.
+fn tab_key(id: &str) -> String {
+    format!("{TAB_KEY_PREFIX}{id}")
+}
+
+/// Normaliza el índice guardado: fuera de rango o ilegible vuelve al valor por defecto.
+fn normalize_tab(raw: Option<&str>, count: usize, fallback: usize) -> usize {
+    if count == 0 {
+        return 0;
+    }
+    raw.and_then(|value| value.trim().parse::<usize>().ok())
+        .filter(|index| *index < count)
+        .unwrap_or_else(|| fallback.min(count - 1))
+}
+
+/// Señal de selección que arranca en la última pestaña recordada para este grupo.
+///
+/// Se usa en lugar de `RwSignal::new(...)` en los padres para que recargar la página
+/// devuelva al usuario a la sección donde estaba.
+pub fn tab_signal(id: &str, count: usize, fallback: usize) -> RwSignal<usize> {
+    let stored = read_key(&tab_key(id));
+    RwSignal::new(normalize_tab(stored.as_deref(), count, fallback))
+}
 
 /// Iniciales mostradas en pantallas estrechas (móvil). Cuando se omite, se usa la
 /// etiqueta completa también en móvil.
@@ -87,6 +115,12 @@ pub fn Tabs(
         {
             flag.set(true);
         }
+    });
+
+    // Recuerda la pestaña activa para restaurarla al recargar o reabrir la app.
+    let persist_key = tab_key(id);
+    Effect::new(move || {
+        write_key(&persist_key, &selected.get().to_string());
     });
 
     let tabs = labels
@@ -184,5 +218,17 @@ mod tests {
         assert_eq!(navigate("End", 1, 4), Some(3));
         assert_eq!(navigate("Enter", 1, 4), None);
         assert_eq!(navigate("ArrowRight", 0, 0), None);
+    }
+
+    #[test]
+    fn saved_tab_only_restores_indices_inside_the_group() {
+        assert_eq!(normalize_tab(None, 4, 2), 2);
+        assert_eq!(normalize_tab(Some("1"), 4, 2), 1);
+        assert_eq!(normalize_tab(Some(" 3 "), 4, 2), 3);
+        assert_eq!(normalize_tab(Some("4"), 4, 2), 2);
+        assert_eq!(normalize_tab(Some("-1"), 4, 2), 2);
+        assert_eq!(normalize_tab(Some("azul"), 4, 2), 2);
+        assert_eq!(normalize_tab(Some("0"), 0, 2), 0);
+        assert_eq!(normalize_tab(None, 2, 9), 1);
     }
 }

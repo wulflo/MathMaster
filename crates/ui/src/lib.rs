@@ -10,7 +10,7 @@
 use std::sync::Arc;
 
 use crate::storage::{read_key, write_key};
-use crate::tabs::PanelBuilder;
+use crate::tabs::{PanelBuilder, tab_signal};
 use anzan_content::{MultiplicationContent, UiStrings};
 use anzan_engine::ProgressState;
 use leptos::prelude::*;
@@ -222,7 +222,7 @@ fn AppBar(
 /// Pestañas de aprendizaje: fundamentos, multiplicación, atajos y tabla 大九九.
 #[component]
 fn LearnTabs(strings: UiStrings, multiplication: MultiplicationContent) -> impl IntoView {
-    let selected = RwSignal::new(0usize);
+    let selected = tab_signal("learn", 4, 0);
     let fundamentals = multiplication.fundamentals.clone();
     let panels: Vec<PanelBuilder> = vec![
         Arc::new({
@@ -320,7 +320,7 @@ fn TrainTabs(
     refresh: RwSignal<u32>,
     demo_request: RwSignal<Option<(u32, bool, u32)>>,
 ) -> impl IntoView {
-    let selected = RwSignal::new(0usize);
+    let selected = tab_signal("train", 4, 0);
     let panels: Vec<PanelBuilder> = vec![
         Arc::new({
             let strings = strings.clone();
@@ -370,7 +370,7 @@ fn TrainTabs(
 /// Pestañas de progreso: dominio, repaso y diagnóstico.
 #[component]
 fn ProgressTabs(strings: UiStrings, refresh: RwSignal<u32>) -> impl IntoView {
-    let selected = RwSignal::new(0usize);
+    let selected = tab_signal("progress", 3, 0);
     let panels = (0..3)
         .map(|section| {
             let strings = strings.clone();
@@ -425,8 +425,8 @@ pub fn App(strings: UiStrings, multiplication: MultiplicationContent) -> impl In
 
     let stats = RwSignal::new(initial_stats());
     let refresh = RwSignal::new(0u32);
-    let main_tab = RwSignal::new(DEFAULT_MAIN_TAB);
-    let lab_tab = RwSignal::new(0usize);
+    let main_tab = tab_signal("main", 4, DEFAULT_MAIN_TAB);
+    let lab_tab = tab_signal("lab", 2, 0);
     let demo_request = RwSignal::new(None::<(u32, bool, u32)>);
     Effect::new(move || {
         if demo_request.get().is_some() {

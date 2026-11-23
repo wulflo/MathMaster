@@ -31,7 +31,7 @@ translúcidas. Implementación: `crates/ui/assets/style.css`. Decisiones: ADR-00
 | `--anzan-bead-top` | `#f9fcff` | Ficha inactiva (arriba) |
 | `--anzan-bead-bottom` | `#c6d8f2` | Ficha inactiva (abajo) |
 | `--anzan-bead-edge` | `rgba(11,27,51,0.22)` | Borde de ficha |
-| `--anzan-border` | `rgba(255,255,255,0.72)` | Borde claro |
+| `--anzan-border` | `color-mix(in srgb, var(--anzan-accent) 32%, transparent)` | Borde y separadores (tinte del acento) |
 | `--anzan-accent` | `#1f5fd6` | Acento y enlaces |
 | `--anzan-on-accent` | `#ffffff` | Texto sobre acento |
 | `--anzan-glow` | `rgba(94,160,255,0.35)` | Halo del fondo |
@@ -50,7 +50,7 @@ translúcidas. Implementación: `crates/ui/assets/style.css`. Decisiones: ADR-00
 | `--anzan-bead-top` | `#5b769c` | Ficha inactiva (arriba) |
 | `--anzan-bead-bottom` | `#29405f` | Ficha inactiva (abajo) |
 | `--anzan-bead-edge` | `rgba(190,216,255,0.4)` | Borde de ficha |
-| `--anzan-border` | `rgba(160,200,255,0.24)` | Borde |
+| `--anzan-border` | `color-mix(in srgb, var(--anzan-accent) 26%, transparent)` | Borde y separadores (tinte del acento) |
 | `--anzan-accent` | `#7db2ff` | Acento y enlaces |
 | `--anzan-on-accent` | `#050b14` | Texto sobre acento |
 | `--anzan-glow` | `rgba(64,130,255,0.28)` | Halo del fondo |
