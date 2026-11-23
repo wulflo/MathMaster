@@ -18,11 +18,23 @@ pub const MIN_RODS: usize = 4;
 /// Varillas mínimas y máximas del laboratorio.
 pub const MAX_RODS: usize = 13;
 
-/// Dígitos de un valor para el ábaco de sólo lectura.
+/// Dígitos de un valor para el ábaco de sólo lectura (todas las varillas, incl. ceros a la izquierda).
 fn digits_of(value: u128) -> Vec<u8> {
     Soroban::from_value(value, MAX_RODS)
         .map(|soroban| soroban.digits().iter().map(|digit| digit.value()).collect())
         .unwrap_or_default()
+}
+
+/// Dígitos de un valor sin los ceros a la izquierda.
+/// Devuelve al menos un dígito (un 0 si el valor es 0), de modo que el ábaco del
+/// demostrador no gaste ancho en varillas vacías que no aportan información.
+fn digits_significant(value: u128) -> Vec<u8> {
+    let all = digits_of(value);
+    let first_nonzero = all.iter().position(|&d| d != 0);
+    match first_nonzero {
+        Some(i) => all[i..].to_vec(),
+        None => vec![0],
+    }
 }
 
 /// Etiqueta de la regla de un paso.
@@ -151,7 +163,7 @@ pub fn MovementDemo(
                                 <span class="anzan-demo-touch">
                                     {format!("{} · {}", step.touch.rod, step.touch.slot.index())}
                                 </span>
-                                {abacus_view(&digits_of(*value), &step_strings.mul_rods_label)}
+                                {abacus_view(&digits_significant(*value), &step_strings.mul_rods_label)}
                             </li>
                         }
                         .into_any()
@@ -235,6 +247,14 @@ mod tests {
     fn rod_selector_stays_inside_the_documented_range() {
         assert_eq!(MIN_RODS, 4);
         assert_eq!(MAX_RODS, 13);
+    }
+
+    #[test]
+    fn significant_digits_drop_leading_zeros() {
+        assert_eq!(digits_significant(0), vec![0]);
+        assert_eq!(digits_significant(600), vec![6, 0, 0]);
+        assert_eq!(digits_significant(1500), vec![1, 5, 0, 0]);
+        assert_eq!(digits_significant(99_999), vec![9, 9, 9, 9, 9]);
     }
 
     #[test]

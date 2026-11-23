@@ -2077,6 +2077,34 @@ h1 {
   color: var(--anzan-accent);
 }
 
+/* El ábaco del demostrador aprovecha el ancho disponible: al recortar los ceros a
+   la izquierda quedan pocas varillas, que crecen para leerse mejor. */
+.anzan-demo-steps .anzan-abacus {
+  flex: 1 1 20rem;
+  min-width: 0;
+}
+
+.anzan-demo-steps .anzan-abacus-rod {
+  flex: 1 1 0;
+  max-width: 4.8rem;
+  min-width: 2rem;
+}
+
+@media (min-width: 768px) {
+  .anzan-demo-steps .anzan-abacus-bead {
+    width: min(3.4rem, 100%);
+    height: 1.15rem;
+  }
+
+  .anzan-demo-steps .anzan-abacus-beam {
+    width: min(3.7rem, 100%);
+  }
+
+  .anzan-demo-steps .anzan-abacus-digit {
+    font-size: 0.95rem;
+  }
+}
+
 /* ==========================================================================
    REDISEÑO: respuesta ultrarrápida, Mitori y entrenamiento dirigido
    ========================================================================== */
@@ -2511,6 +2539,44 @@ h1 {
 
   .anzan-tab-label-short {
     display: inline-block;
+  }
+
+  /* Capítulos de fundamentos (C1, C2…): la nomenclatura ya es autodescriptiva y
+     corta, así que en móvil se muestra el nombre completo directamente dentro
+     de cada pestaña, sin ocultarlo ni ponerlo en un tooltip flotante. */
+  .anzan-tabs[data-tabs="chapters"] .anzan-tab-label-full {
+    position: static;
+    top: auto;
+    left: auto;
+    transform: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    background: transparent;
+    color: var(--anzan-text);
+    border: none;
+    box-shadow: none;
+    max-width: none;
+    text-align: center;
+    white-space: nowrap;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .anzan-tabs[data-tabs="chapters"] .anzan-tab.is-active .anzan-tab-label-full {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .anzan-tabs[data-tabs="chapters"] .anzan-tab-label-short {
+    display: none;
+  }
+
+  /* Espacio debajo de las pestañas para que el nombre completo flotante de la
+     pestaña activa quepa sin forzar scroll en la barra. */
+  .anzan-tablist {
+    padding-bottom: 4.4rem;
   }
 }
 

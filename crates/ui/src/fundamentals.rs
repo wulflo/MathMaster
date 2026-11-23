@@ -462,6 +462,8 @@ pub fn FundamentalsView(strings: UiStrings, content: FundamentalsContent) -> imp
         })
         .unzip();
 
+    let chapter_shorts = labels.clone();
+
     view! {
         <section class="anzan-fundamentals" aria-labelledby="anzan-fundamentals-title">
             <header class="anzan-fundamentals-head">
@@ -475,6 +477,7 @@ pub fn FundamentalsView(strings: UiStrings, content: FundamentalsContent) -> imp
                     aria_label=strings.subtablist_label.clone()
                     selected=RwSignal::new(0usize)
                     panels=panels
+                    short_labels=chapter_shorts
                 />
             </div>
         </section>

@@ -471,51 +471,49 @@ pub fn App(strings: UiStrings, multiplication: MultiplicationContent) -> impl In
             class="anzan-root"
             style=move || format!("--anzan-accent: var(--anzan-accent-{});", accent.get() + 1)
         >
-            <div class="anzan-card">
-                <AppBar
-                    app_name=app_name
-                    kicker=kicker
-                    tagline=tagline
-                    progress_level=progress_level
-                    progress_streak=progress_streak
-                    accent_picker_label=accent_picker_label
-                    accent_names=accent_names
-                    theme_label=theme_label
-                    theme_light=theme_light
-                    theme_dark=theme_dark
-                    language=language.clone()
-                    lang_es=lang_es
-                    lang_en=lang_en
-                    stats=stats
-                    accent=accent
-                    dark=dark
-                />
-                <Tabs
-                    id="main"
-                    labels=vec![
-                        strings.tab_learn.clone(),
-                        strings.tab_lab.clone(),
-                        strings.tab_train.clone(),
-                        strings.tab_progress.clone(),
-                    ]
-                    aria_label=strings.tablist_label.clone()
-                    selected=main_tab
-                    panels=main_panels
-                    short_labels=vec!["A".into(), "L".into(), "E".into(), "P".into()]
-                />
-                <footer class="anzan-footer">
-                    <nav class="anzan-lang" aria-label=language>
-                        <a href="?lang=es">{strings.spanish.clone()}</a>
-                        <span class="anzan-sep">{separator.clone()}</span>
-                        <a href="?lang=en">{strings.english.clone()}</a>
-                    </nav>
-                    <nav class="anzan-links">
-                        <a href="https://github.com/wulflo/MathMaster" target="_blank" rel="noreferrer">{source_label}</a>
-                        <span class="anzan-sep">{separator}</span>
-                        <a href="https://github.com/wulflo/MathMaster/blob/main/LICENSE" target="_blank" rel="noreferrer">{license_label}</a>
-                    </nav>
-                </footer>
-            </div>
+            <AppBar
+                app_name=app_name
+                kicker=kicker
+                tagline=tagline
+                progress_level=progress_level
+                progress_streak=progress_streak
+                accent_picker_label=accent_picker_label
+                accent_names=accent_names
+                theme_label=theme_label
+                theme_light=theme_light
+                theme_dark=theme_dark
+                language=language.clone()
+                lang_es=lang_es
+                lang_en=lang_en
+                stats=stats
+                accent=accent
+                dark=dark
+            />
+            <Tabs
+                id="main"
+                labels=vec![
+                    strings.tab_learn.clone(),
+                    strings.tab_lab.clone(),
+                    strings.tab_train.clone(),
+                    strings.tab_progress.clone(),
+                ]
+                aria_label=strings.tablist_label.clone()
+                selected=main_tab
+                panels=main_panels
+                short_labels=vec!["A".into(), "L".into(), "E".into(), "P".into()]
+            />
+            <footer class="anzan-footer">
+                <nav class="anzan-lang" aria-label=language>
+                    <a href="?lang=es">{strings.spanish.clone()}</a>
+                    <span class="anzan-sep">{separator.clone()}</span>
+                    <a href="?lang=en">{strings.english.clone()}</a>
+                </nav>
+                <nav class="anzan-links">
+                    <a href="https://github.com/wulflo/MathMaster" target="_blank" rel="noreferrer">{source_label}</a>
+                    <span class="anzan-sep">{separator}</span>
+                    <a href="https://github.com/wulflo/MathMaster/blob/main/LICENSE" target="_blank" rel="noreferrer">{license_label}</a>
+                </nav>
+            </footer>
         </main>
     }
 }
