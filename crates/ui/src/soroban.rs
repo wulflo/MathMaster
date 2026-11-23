@@ -23,6 +23,22 @@ const SLOTS: [Slot; 5] = [
 /// Relación alto/ancho del tablero (`aspect-ratio: 4 / 3` en el CSS).
 const BOARD_ASPECT: f32 = 4.0 / 3.0;
 
+/// Forma de las cuentas del soroban, configurable desde el laboratorio.
+#[derive(Clone, Copy, PartialEq, Eq, Default)]
+pub enum BeadShape {
+    #[default]
+    /// Cuenta clásica, más ancha que alta y con contorno elíptico.
+    Circle,
+    /// Cuenta con esquinas muy redondeadas (píldora).
+    Pill,
+    /// Cuenta rectangular sin redondeo.
+    Square,
+}
+
+impl BeadShape {
+    const VARIANTS: [BeadShape; 3] = [BeadShape::Circle, BeadShape::Pill, BeadShape::Square];
+}
+
 /// Reduce el rectángulo de un hueco a una ficha cuadrada centrada.
 ///
 /// El botón conserva un área de impacto razonable, pero la ficha dibujada tiene forma de
@@ -65,9 +81,15 @@ pub fn SorobanBoard(
 
     let soroban = RwSignal::new(Soroban::from_value(0, rods).unwrap_or_default());
     let stage = RwSignal::new(FadeStage::Full);
+    let bead_shape = RwSignal::new(BeadShape::default());
     let show = RwSignal::new(true);
     let pressed = RwSignal::new(None::<Touch>);
     let geometry = SorobanGeometry::for_rods(rods);
+
+    let lab_bead_shape = strings.lab_bead_shape.clone();
+    let bead_circle = strings.bead_shape_circle.clone();
+    let bead_pill = strings.bead_shape_pill.clone();
+    let bead_square = strings.bead_shape_square.clone();
 
     let apply_touch = Callback::new(move |touch: Touch| {
         pressed.set(Some(touch));
@@ -239,7 +261,11 @@ pub fn SorobanBoard(
                 </output>
             </header>
 
-            <div class="anzan-soroban" style=container_style>
+            <div class="anzan-soroban"
+                class:anzan-bead-shape-circle=move || bead_shape.get() == BeadShape::Circle
+                class:anzan-bead-shape-pill=move || bead_shape.get() == BeadShape::Pill
+                class:anzan-bead-shape-square=move || bead_shape.get() == BeadShape::Square
+                style=container_style>
                 {rod_lines}
                 <span class="anzan-beam" style=beam_style></span>
                 {beads}
@@ -250,6 +276,31 @@ pub fn SorobanBoard(
                 <span class="anzan-control-label">{fade_label}</span>
                 <div class="anzan-stage-buttons" role="group" aria-label=fade_aria>
                     {stage_buttons}
+                </div>
+                <span class="anzan-control-label">{lab_bead_shape.clone()}</span>
+                <div class="anzan-stage-buttons" role="group" aria-label=lab_bead_shape>
+                    {BeadShape::VARIANTS
+                        .into_iter()
+                        .map(|shape| {
+                            let label = match shape {
+                                BeadShape::Circle => bead_circle.clone(),
+                                BeadShape::Pill => bead_pill.clone(),
+                                BeadShape::Square => bead_square.clone(),
+                            };
+                            let is_active = move || bead_shape.get() == shape;
+                            view! {
+                                <button
+                                    type="button"
+                                    class="anzan-stage"
+                                    class:is-active=is_active
+                                    aria-pressed=move || if is_active() { "true" } else { "false" }
+                                    on:click=move |_| bead_shape.set(shape)
+                                >
+                                    {label}
+                                </button>
+                            }
+                        })
+                        .collect_view()}
                 </div>
                 <button
                     type="button"

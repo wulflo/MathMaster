@@ -7,7 +7,10 @@
 #![forbid(unsafe_code)]
 #![allow(missing_docs)] // Los props generados por `#[component]` no llevan doc individual.
 
+use std::sync::Arc;
+
 use crate::storage::{read_key, write_key};
+use crate::tabs::PanelBuilder;
 use anzan_content::{MultiplicationContent, UiStrings};
 use anzan_engine::ProgressState;
 use leptos::prelude::*;
@@ -29,7 +32,7 @@ pub use lab::{MovementDemo, SorobanLab};
 pub use multiplication::{MultiplicationLearn, MultiplicationPractice, Table99View};
 pub use progress_view::ProgressPanel;
 pub use soroban::SorobanBoard;
-pub use tabs::Tabs;
+pub use tabs::{ShortLabels, Tabs};
 pub use training::{DirectedView, MitoriView};
 
 const STYLE: &str = include_str!("../assets/style.css");
@@ -221,20 +224,39 @@ fn AppBar(
 fn LearnTabs(strings: UiStrings, multiplication: MultiplicationContent) -> impl IntoView {
     let selected = RwSignal::new(0usize);
     let fundamentals = multiplication.fundamentals.clone();
-    let panels = vec![
-        view! {
-            <FundamentalsView strings=strings.clone() content=fundamentals />
-        }
-        .into_any(),
-        view! {
-            <MultiplicationLearn strings=strings.clone() content=multiplication.clone() kind=1 />
-        }
-        .into_any(),
-        view! {
-            <MultiplicationLearn strings=strings.clone() content=multiplication.clone() kind=2 />
-        }
-        .into_any(),
-        view! { <Table99View strings=strings.clone() /> }.into_any(),
+    let panels: Vec<PanelBuilder> = vec![
+        Arc::new({
+            let strings = strings.clone();
+            let fundamentals = fundamentals.clone();
+            move || {
+                view! { <FundamentalsView strings=strings.clone() content=fundamentals.clone() /> }
+                    .into_any()
+            }
+        }),
+        Arc::new({
+            let strings = strings.clone();
+            let multiplication = multiplication.clone();
+            move || {
+                view! {
+                    <MultiplicationLearn strings=strings.clone() content=multiplication.clone() kind=1 />
+                }
+                .into_any()
+            }
+        }),
+        Arc::new({
+            let strings = strings.clone();
+            let multiplication = multiplication.clone();
+            move || {
+                view! {
+                    <MultiplicationLearn strings=strings.clone() content=multiplication.clone() kind=2 />
+                }
+                .into_any()
+            }
+        }),
+        Arc::new({
+            let strings = strings.clone();
+            move || view! { <Table99View strings=strings.clone() /> }.into_any()
+        }),
     ];
     view! {
         <Tabs
@@ -248,6 +270,12 @@ fn LearnTabs(strings: UiStrings, multiplication: MultiplicationContent) -> impl 
             aria_label=strings.subtablist_label
             selected=selected
             panels=panels
+            short_labels=vec![
+                "F".into(),
+                "M".into(),
+                "A".into(),
+                "T".into(),
+            ]
         />
     }
 }
@@ -259,9 +287,18 @@ fn LabTabs(
     selected: RwSignal<usize>,
     demo_request: RwSignal<Option<(u32, bool, u32)>>,
 ) -> impl IntoView {
-    let panels = vec![
-        view! { <SorobanLab strings=strings.clone() /> }.into_any(),
-        view! { <MovementDemo strings=strings.clone() demo_request=demo_request /> }.into_any(),
+    let panels: Vec<PanelBuilder> = vec![
+        Arc::new({
+            let strings = strings.clone();
+            move || view! { <SorobanLab strings=strings.clone() /> }.into_any()
+        }),
+        Arc::new({
+            let strings = strings.clone();
+            move || {
+                view! { <MovementDemo strings=strings.clone() demo_request=demo_request /> }
+                    .into_any()
+            }
+        }),
     ];
     view! {
         <Tabs
@@ -270,6 +307,7 @@ fn LabTabs(
             aria_label=strings.subtablist_label
             selected=selected
             panels=panels
+            short_labels=vec!["S".into(), "M".into()]
         />
     }
 }
@@ -283,14 +321,34 @@ fn TrainTabs(
     demo_request: RwSignal<Option<(u32, bool, u32)>>,
 ) -> impl IntoView {
     let selected = RwSignal::new(0usize);
-    let panels = vec![
-        view! {
-            <FlashAnzan strings=strings.clone() header_stats=stats refresh=refresh demo_request=demo_request />
-        }
-        .into_any(),
-        view! { <MitoriView strings=strings.clone() demo_request=demo_request /> }.into_any(),
-        view! { <MultiplicationPractice strings=strings.clone() /> }.into_any(),
-        view! { <DirectedView strings=strings.clone() demo_request=demo_request /> }.into_any(),
+    let panels: Vec<PanelBuilder> = vec![
+        Arc::new({
+            let strings = strings.clone();
+            move || {
+                view! {
+                    <FlashAnzan strings=strings.clone() header_stats=stats refresh=refresh demo_request=demo_request />
+                }
+                .into_any()
+            }
+        }),
+        Arc::new({
+            let strings = strings.clone();
+            move || {
+                view! { <MitoriView strings=strings.clone() demo_request=demo_request /> }
+                    .into_any()
+            }
+        }),
+        Arc::new({
+            let strings = strings.clone();
+            move || view! { <MultiplicationPractice strings=strings.clone() /> }.into_any()
+        }),
+        Arc::new({
+            let strings = strings.clone();
+            move || {
+                view! { <DirectedView strings=strings.clone() demo_request=demo_request /> }
+                    .into_any()
+            }
+        }),
     ];
     view! {
         <Tabs
@@ -304,6 +362,7 @@ fn TrainTabs(
             aria_label=strings.subtablist_label
             selected=selected
             panels=panels
+            short_labels=vec!["F".into(), "M".into(), "M".into(), "D".into()]
         />
     }
 }
@@ -314,8 +373,11 @@ fn ProgressTabs(strings: UiStrings, refresh: RwSignal<u32>) -> impl IntoView {
     let selected = RwSignal::new(0usize);
     let panels = (0..3)
         .map(|section| {
-            view! { <ProgressPanel strings=strings.clone() refresh=refresh section=section /> }
-                .into_any()
+            let strings = strings.clone();
+            Arc::new(move || {
+                view! { <ProgressPanel strings=strings.clone() refresh=refresh section=section /> }
+                    .into_any()
+            }) as PanelBuilder
         })
         .collect::<Vec<_>>();
     view! {
@@ -329,6 +391,7 @@ fn ProgressTabs(strings: UiStrings, refresh: RwSignal<u32>) -> impl IntoView {
             aria_label=strings.subtablist_label
             selected=selected
             panels=panels
+            short_labels=vec!["M".into(), "R".into(), "D".into()]
         />
     }
 }
@@ -371,16 +434,35 @@ pub fn App(strings: UiStrings, multiplication: MultiplicationContent) -> impl In
             lab_tab.set(1);
         }
     });
-    let main_panels = vec![
-        view! { <LearnTabs strings=strings.clone() multiplication=multiplication.clone() /> }
-            .into_any(),
-        view! { <LabTabs strings=strings.clone() selected=lab_tab demo_request=demo_request /> }
-            .into_any(),
-        view! {
-            <TrainTabs strings=strings.clone() stats=stats refresh=refresh demo_request=demo_request />
-        }
-        .into_any(),
-        view! { <ProgressTabs strings=strings.clone() refresh=refresh /> }.into_any(),
+    let main_panels: Vec<PanelBuilder> = vec![
+        Arc::new({
+            let strings = strings.clone();
+            let multiplication = multiplication.clone();
+            move || {
+                view! { <LearnTabs strings=strings.clone() multiplication=multiplication.clone() /> }
+                    .into_any()
+            }
+        }),
+        Arc::new({
+            let strings = strings.clone();
+            move || {
+                view! { <LabTabs strings=strings.clone() selected=lab_tab demo_request=demo_request /> }
+                    .into_any()
+            }
+        }),
+        Arc::new({
+            let strings = strings.clone();
+            move || {
+                view! {
+                    <TrainTabs strings=strings.clone() stats=stats refresh=refresh demo_request=demo_request />
+                }
+                .into_any()
+            }
+        }),
+        Arc::new({
+            let strings = strings.clone();
+            move || view! { <ProgressTabs strings=strings.clone() refresh=refresh /> }.into_any()
+        }),
     ];
 
     view! {
@@ -419,6 +501,7 @@ pub fn App(strings: UiStrings, multiplication: MultiplicationContent) -> impl In
                     aria_label=strings.tablist_label.clone()
                     selected=main_tab
                     panels=main_panels
+                    short_labels=vec!["A".into(), "L".into(), "E".into(), "P".into()]
                 />
                 <footer class="anzan-footer">
                     <nav class="anzan-lang" aria-label=language>

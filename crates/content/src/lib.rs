@@ -329,6 +329,14 @@ pub struct UiStrings {
     // --- REDESENO: laboratorio y demostrador ---
     /// Etiqueta del selector de varillas.
     pub lab_rods: String,
+    /// Etiqueta del selector de forma de las cuentas del soroban.
+    pub lab_bead_shape: String,
+    /// Etiqueta de la forma clásica (cuenta elíptica/redondeada).
+    pub bead_shape_circle: String,
+    /// Etiqueta de la forma píldora (esquinas totalmente redondeadas).
+    pub bead_shape_pill: String,
+    /// Etiqueta de la forma cuadrada (sin redondeo).
+    pub bead_shape_square: String,
     /// Título del demostrador de movimientos.
     pub demo_title: String,
     /// Valor inicial de la operación.

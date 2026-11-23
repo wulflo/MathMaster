@@ -401,6 +401,19 @@ h1 {
   outline-offset: 2px;
 }
 
+/* Forma de las cuentas del soroban (configurable en el laboratorio). */
+.anzan-bead-shape-circle .anzan-bead {
+  border-radius: 50%;
+}
+
+.anzan-bead-shape-pill .anzan-bead {
+  border-radius: 9999px;
+}
+
+.anzan-bead-shape-square .anzan-bead {
+  border-radius: 0;
+}
+
 .anzan-controls {
   display: flex;
   flex-wrap: wrap;
@@ -2298,8 +2311,9 @@ h1 {
 .anzan-diagram-svg {
   display: block;
   width: 100%;
+  max-width: 32rem;
   height: auto;
-  min-width: 18rem;
+  margin-inline: auto;
 }
 
 .diagram-frame {
@@ -2417,11 +2431,173 @@ h1 {
 }
 
 @media (max-width: 520px) {
-  .anzan-diagram-svg {
-    min-width: 20rem;
-  }
-
   .diagram-caption {
     font-size: 9px;
+  }
+}
+
+/* ==========================================================================
+   PESTAÑAS DE CAPÍTULO Y SOPORTE MÓVIL
+   La barra de pestañas se desplaza horizontalmente en vez de partir la fila;
+   el contenido ancho (tablas, esquemas) se desplaza dentro de su contenedor.
+   ========================================================================== */
+
+.anzan-tabs,
+.anzan-tablist,
+.anzan-tabpanels,
+.anzan-tabpanel {
+  min-width: 0;
+}
+
+.anzan-tablist {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.anzan-tablist::-webkit-scrollbar {
+  display: none;
+}
+
+.anzan-tab-label-full {
+  white-space: nowrap;
+}
+
+.anzan-tab-label-short {
+  display: none;
+  white-space: nowrap;
+}
+
+.anzan-tabpanel[hidden] {
+  display: none;
+}
+
+/* En pantallas estrechas (móvil) solo se muestran las iniciales, y el scrollbar
+   se oculta del todo porque se navega con las flechas del teclado o el tacto. */
+@media (max-width: 640px) {
+  .anzan-tab-label-full {
+    display: none;
+  }
+
+  .anzan-tab-label-short {
+    display: inline-block;
+  }
+}
+
+/* Capítulos del manual: pestañas adosadas, sin huecos entre ellas. */
+.anzan-chapter-tabs {
+  margin-top: 0.9rem;
+}
+
+.anzan-chapter-tabs .anzan-tablist {
+  gap: 0;
+  padding: 0.25rem 0.25rem 0.45rem;
+}
+
+.anzan-chapter-tabs .anzan-tab {
+  margin-right: 0.15rem;
+}
+
+.anzan-chapter-tabs .anzan-tab-label {
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.anzan-chapter-tabs .anzan-tabpanel {
+  padding: 0.9rem 0.2rem 0;
+}
+
+.anzan-chapter-body {
+  min-width: 0;
+}
+
+.anzan-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+/* El modal de una tarjeta no debe replicar el coste de pintado del fondo en móvil. */
+@media (max-width: 780px) {
+  .anzan-root {
+    padding: 1rem 0.75rem 2.5rem;
+    background-attachment: scroll;
+  }
+
+  .anzan-card,
+  .anzan-appbar,
+  .anzan-appbar > *,
+  .anzan-tabs,
+  .anzan-tabpanels,
+  .anzan-tabpanel,
+  .anzan-chapter-body {
+    min-width: 0;
+  }
+
+  .anzan-card {
+    padding: 1rem;
+    background: var(--anzan-surface-strong);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .anzan-appbar-controls {
+    flex-wrap: wrap;
+  }
+
+  .anzan-accent-picker,
+  .anzan-accent-options {
+    flex-wrap: wrap;
+  }
+
+  .anzan-lang-compact {
+    margin-left: 0;
+  }
+
+  .anzan-tab {
+    min-height: 2.75rem;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+  }
+
+  .anzan-table-scroll .anzan-formula-table {
+    min-width: 30rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .anzan-root {
+    padding: 0.6rem 0.4rem 2rem;
+  }
+
+  .anzan-card {
+    padding: 0.8rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 10vw, 2.6rem);
+  }
+
+  .anzan-appbar-controls .anzan-accent-swatch {
+    width: 1.65rem;
+    height: 1.65rem;
+  }
+
+  .anzan-chapter-tabs .anzan-tab-label {
+    max-width: 12rem;
+  }
+
+  .anzan-formula-abaci .anzan-abacus {
+    transform: scale(0.66);
+    margin-right: -28%;
+  }
+}
+
+@media (pointer: coarse) {
+  .anzan-tab {
+    min-height: 2.75rem;
   }
 }

@@ -4,10 +4,21 @@
 //! El componente es puramente presentacional: recibe la señal de selección del padre, de
 //! modo que cualquier vista puede pedir el cambio de pestaña (por ejemplo, el botón
 //! «Ver en el soroban» después de un fallo).
+//!
+//! Los paneles se construyen de forma diferida: cada `PanelBuilder` se invoca la primera
+//! vez que se selecciona su pestaña y el view resultante se conserva en el DOM (oculto
+//! con `hidden`) para no perder el estado al volver a cambiar de pestaña. Así la carga
+//! inicial no monta el árbol completo de las cuatro secciones —importantísimo en móvil—.
 
 #![allow(missing_docs)] // Props generados por `#[component]`.
 
+use std::sync::Arc;
+
 use leptos::prelude::*;
+
+/// Iniciales mostradas en pantallas estrechas (móvil). Cuando se omite, se usa la
+/// etiqueta completa también en móvil.
+pub type ShortLabels = Vec<String>;
 
 /// Enfoca una pestaña por su identificador; en nativo no hay documento que enfocar.
 #[cfg(target_arch = "wasm32")]
@@ -39,6 +50,9 @@ fn navigate(key: &str, current: usize, count: usize) -> Option<usize> {
     }
 }
 
+/// Fábrica diferida del contenido de un panel.
+pub type PanelBuilder = Arc<dyn Fn() -> AnyView + Send + Sync + 'static>;
+
 /// Barra de pestañas y sus paneles.
 #[component]
 pub fn Tabs(
@@ -50,10 +64,31 @@ pub fn Tabs(
     aria_label: String,
     /// Señal con el índice seleccionado (controlada por el padre).
     selected: RwSignal<usize>,
-    /// Contenido de cada panel, en el mismo orden que `labels`.
-    panels: Vec<AnyView>,
+    /// Fábricas de los paneles, en el mismo orden que `labels`.
+    panels: Vec<PanelBuilder>,
+    /// Etiquetas cortas (iniciales) para pantallas estrechas; si faltan, se usa la
+    /// etiqueta completa en todos los anchos.
+    #[prop(optional)]
+    short_labels: Option<Vec<String>>,
 ) -> impl IntoView {
     let count = labels.len();
+    let shorts = short_labels.as_deref().unwrap_or(&[]);
+
+    // Un panel se monta la primera vez que se selecciona; a partir de ahí permanece
+    // oculto en vez de desmontarse, para conservar el estado de los drills.
+    let visited: Vec<RwSignal<bool>> = (0..count)
+        .map(|index| RwSignal::new(selected.get_untracked() == index))
+        .collect();
+    let visited_on_change = visited.clone();
+    Effect::new(move || {
+        let active = selected.get();
+        if let Some(flag) = visited_on_change.get(active)
+            && !flag.get_untracked()
+        {
+            flag.set(true);
+        }
+    });
+
     let tabs = labels
         .into_iter()
         .enumerate()
@@ -81,7 +116,15 @@ pub fn Tabs(
                         }
                     }
                 >
-                    <span class="anzan-tab-label">{label}</span>
+                    <span class="anzan-tab-label-full">{label}</span>
+                    {shorts.get(index).map(|short| {
+                        view! {
+                            <span class="anzan-tab-label-short" aria-hidden="true">
+                                {short.clone()}
+                            </span>
+                        }
+                        .into_any()
+                    })}
                     <span class="anzan-tab-indicator" aria-hidden="true"></span>
                 </button>
             }
@@ -92,9 +135,10 @@ pub fn Tabs(
     let bodies = panels
         .into_iter()
         .enumerate()
-        .map(|(index, panel)| {
+        .map(|(index, build)| {
             let tab_id = format!("anzan-tab-{id}-{index}");
             let panel_id = format!("anzan-panel-{id}-{index}");
+            let flag = visited[index];
             view! {
                 <div
                     role="tabpanel"
@@ -103,7 +147,14 @@ pub fn Tabs(
                     aria-labelledby=tab_id
                     hidden=move || selected.get() != index
                 >
-                    {panel}
+                    {move || {
+                        if flag.get() {
+                            build()
+                        } else {
+                            // Panel no visitado aún: sin nodos hasta que se abra su pestaña.
+                            view! { <span style="display:none"></span> }.into_any()
+                        }
+                    }}
                 </div>
             }
             .into_any()
@@ -128,7 +179,7 @@ mod tests {
     fn arrow_keys_wrap_and_home_end_jump() {
         assert_eq!(navigate("ArrowRight", 0, 4), Some(1));
         assert_eq!(navigate("ArrowRight", 3, 4), Some(0));
-        assert_eq!(navigate("ArrowLeft", 0, 4), Some(3));
+        assert_eq!(navigate("ArrowLeft", 0, 3), Some(2));
         assert_eq!(navigate("Home", 2, 4), Some(0));
         assert_eq!(navigate("End", 1, 4), Some(3));
         assert_eq!(navigate("Enter", 1, 4), None);

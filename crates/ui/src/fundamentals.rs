@@ -7,7 +7,10 @@
 
 #![allow(missing_docs)]
 
+use std::sync::Arc;
+
 use crate::multiplication::abacus_view;
+use crate::tabs::{PanelBuilder, Tabs};
 use anzan_content::{FormulaRow, FundamentalsContent, FundamentalsSection, UiStrings};
 use anzan_core::Soroban;
 use leptos::prelude::*;
@@ -130,17 +133,17 @@ fn FormulaDemo(section: FundamentalsSection, strings: UiStrings) -> impl IntoVie
 }
 
 /// Un varillero del ábaco en SVG; los colores vienen de los tokens del tema.
+///
+/// Las cuentas ocupan posiciones fijas y separadas (no dependen del estado activo), de modo
+/// que nunca se condensan ni se desalinean entre el estado activo e inactivo.
 fn rod_group(x: i32, digit: u8, frame: bool) -> AnyView {
     let heaven = digit >= 5;
-    let earth = digit % 5;
+    let earth = usize::from(digit % 5);
     let earth_beads = (0..4)
         .map(|index| {
-            let active = index < usize::from(earth);
-            let cy = if active {
-                100 - index * 11
-            } else {
-                120 + index * 17
-            };
+            let active = index < earth;
+            // Cuentas terrestres siempre en las mismas alturas, bien separadas.
+            let cy = 96 + index * 24; // 96, 120, 144, 168
             view! {
                 <circle
                     class=move || format!("diagram-bead{}", if active { " is-active" } else { "" })
@@ -152,6 +155,8 @@ fn rod_group(x: i32, digit: u8, frame: bool) -> AnyView {
             .into_any()
         })
         .collect_view();
+    // La cuenta celestial siempre en la misma altura; solo cambia de color cuando está activa.
+    let heaven_cy = 30;
     view! {
         <g class="diagram-rod" transform=format!("translate({x},0)")>
             {frame.then(|| view! {
@@ -162,11 +167,11 @@ fn rod_group(x: i32, digit: u8, frame: bool) -> AnyView {
             <circle
                 class=format!("diagram-bead is-heaven{}", if heaven { " is-active" } else { "" })
                 cx="18"
-                cy=if heaven { 52 } else { 28 }
+                cy=heaven_cy
                 r="7"
             />
             {earth_beads}
-            <text class="diagram-digit" x="18" y="198" text-anchor="middle">
+            <text class="diagram-digit" x="18" y="200" text-anchor="middle">
                 {digit.to_string()}
             </text>
         </g>
@@ -174,7 +179,7 @@ fn rod_group(x: i32, digit: u8, frame: bool) -> AnyView {
     .into_any()
 }
 
-/// Flecha horizontal hacia la derecha.
+/// Flecha horizontal hacia la derecha, con punta en `x2`.
 fn arrow_right(x1: i32, y: i32, x2: i32) -> AnyView {
     view! {
         <g class="diagram-arrow">
@@ -185,7 +190,7 @@ fn arrow_right(x1: i32, y: i32, x2: i32) -> AnyView {
     .into_any()
 }
 
-/// Flecha vertical hacia arriba (pulgar).
+/// Flecha vertical hacia arriba (pulgar): punta en `y2` (tope).
 fn arrow_up(x: i32, y1: i32, y2: i32) -> AnyView {
     view! {
         <g class="diagram-arrow">
@@ -196,7 +201,7 @@ fn arrow_up(x: i32, y1: i32, y2: i32) -> AnyView {
     .into_any()
 }
 
-/// Flecha vertical hacia abajo (índice).
+/// Flecha vertical hacia abajo (índice): punta en `y2` (base).
 fn arrow_down(x: i32, y1: i32, y2: i32) -> AnyView {
     view! {
         <g class="diagram-arrow">
@@ -225,25 +230,22 @@ fn legend(entries: Vec<(String, &'static str)>) -> AnyView {
 }
 
 /// Esquema vectorial asociado a una sección del manual.
+///
+/// Los `viewBox` son compactos (máx. ~660 px) y las varillas van separadas por ~55 px, de modo
+/// que las cuentas nunca se condensan y las flechas ni los textos se solapan. Las etiquetas
+/// van centradas bajo cada varilla; en pantallas muy estrechas el contenedor `anzan-diagram`
+/// ya desplaza horizontalmente (`overflow-x: auto`).
 #[component]
 pub fn SvgDiagram(kind: String, strings: UiStrings) -> impl IntoView {
     let content = match kind.as_str() {
         "anatomy" => view! {
-            <svg class="anzan-diagram-svg" viewBox="0 0 560 230" role="img" aria-label=strings.diagram_hari.clone()>
-                <rect class="diagram-frame" x="20" y="8" width="440" height="172" rx="3" />
+            <svg class="anzan-diagram-svg" viewBox="0 0 430 230" role="img" aria-label=strings.diagram_hari.clone()>
+                <rect class="diagram-frame" x="20" y="8" width="320" height="172" rx="3" />
                 {rod_group(40, 0, false)}
-                {rod_group(120, 8, false)}
-                {rod_group(200, 5, false)}
-                {rod_group(280, 3, false)}
-                {rod_group(360, 0, false)}
-                <line class="diagram-guide" x1="240" y1="62" x2="500" y2="40" />
-                <circle class="diagram-point" cx="500" cy="40" r="5" />
-                <line class="diagram-guide" x1="138" y1="52" x2="500" y2="85" />
-                <circle class="diagram-point" cx="500" cy="85" r="5" />
-                <line class="diagram-guide" x1="298" y1="100" x2="500" y2="130" />
-                <circle class="diagram-point" cx="500" cy="130" r="5" />
-                <line class="diagram-guide" x1="378" y1="182" x2="500" y2="175" />
-                <circle class="diagram-point" cx="500" cy="175" r="5" />
+                {rod_group(100, 8, false)}
+                {rod_group(160, 5, false)}
+                {rod_group(220, 3, false)}
+                {rod_group(280, 0, false)}
             </svg>
             {legend(vec![
                 (strings.diagram_hari, "hari"),
@@ -254,64 +256,60 @@ pub fn SvgDiagram(kind: String, strings: UiStrings) -> impl IntoView {
         }
         .into_any(),
         "reading" => view! {
-            <svg class="anzan-diagram-svg" viewBox="0 0 420 230" role="img" aria-label=strings.diagram_go_dama.clone()>
-                <rect class="diagram-frame" x="14" y="8" width="230" height="172" rx="3" />
-                {rod_group(24, 8, false)}
-                {rod_group(104, 3, false)}
-                {rod_group(184, 5, false)}
-                <text class="diagram-caption" x="272" y="80">"8"</text>
-                <text class="diagram-caption" x="272" y="120">"3"</text>
-                <text class="diagram-caption" x="272" y="160">"5"</text>
+            <svg class="anzan-diagram-svg" viewBox="0 0 380 260" role="img" aria-label=strings.diagram_go_dama.clone()>
+                <rect class="diagram-frame" x="20" y="8" width="280" height="172" rx="3" />
+                {rod_group(60, 8, false)}
+                {rod_group(150, 3, false)}
+                {rod_group(240, 5, false)}
             </svg>
-            {legend(vec![
-                (strings.diagram_go_dama, "heaven"),
-                (strings.diagram_ichi_dama, "earth"),
-            ])}
         }
         .into_any(),
         "fingering" => view! {
-            <svg class="anzan-diagram-svg" viewBox="0 0 460 230" role="img" aria-label=strings.diagram_thumb.clone()>
-                {rod_group(60, 4, true)}
-                {arrow_up(140, 130, 88)}
-                {arrow_down(150, 20, 56)}
-                <text class="diagram-caption" x="190" y="100">{strings.diagram_thumb.clone()}</text>
-                <text class="diagram-caption" x="190" y="150">{strings.diagram_index.clone()}</text>
+            <svg class="anzan-diagram-svg" viewBox="0 0 360 270" role="img" aria-label=strings.diagram_thumb.clone()>
+                {rod_group(90, 4, true)}
+                // Pulgar: levanta la cuenta celestial (arriba de la varilla).
+                {arrow_up(130, 30, 12)}
+                <text class="diagram-caption" x="140" y="36" text-anchor="start">{strings.diagram_thumb.clone()}</text>
+                // Índice: baja una cuenta terrestre (abajo de la varilla).
+                {arrow_down(130, 160, 200)}
+                <text class="diagram-caption" x="140" y="184" text-anchor="start">{strings.diagram_index.clone()}</text>
             </svg>
         }
         .into_any(),
         "complement5" => view! {
-            <svg class="anzan-diagram-svg" viewBox="0 0 520 230" role="img" aria-label=strings.rule_complement5.clone()>
-                {rod_group(30, 4, true)}
-                {arrow_right(110, 100, 190)}
-                {rod_group(210, 5, true)}
-                <text class="diagram-caption" x="90" y="220">{strings.diagram_before.clone()}</text>
-                <text class="diagram-caption" x="270" y="220">{strings.diagram_after.clone()}</text>
+            <svg class="anzan-diagram-svg" viewBox="0 0 460 290" role="img" aria-label=strings.rule_complement5.clone()>
+                {rod_group(60, 4, true)}
+                {arrow_right(100, 100, 190)}
+                {rod_group(270, 5, true)}
+                <text class="diagram-caption" x="78" y="240" text-anchor="middle">{strings.diagram_before.clone()}</text>
+                <text class="diagram-caption" x="288" y="240" text-anchor="middle">{strings.diagram_after.clone()}</text>
             </svg>
         }
         .into_any(),
         "complement10" => view! {
-            <svg class="anzan-diagram-svg" viewBox="0 0 620 230" role="img" aria-label=strings.rule_complement10.clone()>
-                {rod_group(20, 9, true)}
-                {arrow_right(100, 100, 170)}
-                {rod_group(190, 0, true)}
-                {arrow_right(270, 60, 340)}
-                {rod_group(360, 1, true)}
-                <text class="diagram-caption" x="80" y="220">{strings.diagram_before.clone()}</text>
-                <text class="diagram-caption" x="250" y="220">{strings.diagram_after.clone()}</text>
-                <text class="diagram-caption" x="430" y="220">{strings.diagram_carry.clone()}</text>
+            <svg class="anzan-diagram-svg" viewBox="0 0 660 290" role="img" aria-label=strings.rule_complement10.clone()>
+                {rod_group(60, 9, true)}
+                {arrow_right(100, 100, 190)}
+                {rod_group(260, 0, true)}
+                // Acarreo: flecha desde la celestial de la varilla de unidades hacia la de decenas.
+                {arrow_right(300, 40, 370)}
+                {rod_group(460, 1, true)}
+                <text class="diagram-caption" x="78" y="240" text-anchor="middle">{strings.diagram_before.clone()}</text>
+                <text class="diagram-caption" x="278" y="240" text-anchor="middle">{strings.diagram_after.clone()}</text>
+                <text class="diagram-caption" x="478" y="240" text-anchor="middle">{strings.diagram_carry.clone()}</text>
             </svg>
         }
         .into_any(),
         "mixed" => view! {
-            <svg class="anzan-diagram-svg" viewBox="0 0 620 230" role="img" aria-label=strings.diagram_mixed.clone()>
-                {rod_group(20, 9, true)}
-                {arrow_right(100, 100, 170)}
-                {rod_group(190, 5, true)}
-                {arrow_right(270, 60, 340)}
-                {rod_group(360, 1, true)}
-                <text class="diagram-caption" x="80" y="220">{strings.diagram_before.clone()}</text>
-                <text class="diagram-caption" x="250" y="220">{strings.diagram_after.clone()}</text>
-                <text class="diagram-caption" x="430" y="220">{strings.diagram_carry.clone()}</text>
+            <svg class="anzan-diagram-svg" viewBox="0 0 660 290" role="img" aria-label=strings.diagram_mixed.clone()>
+                {rod_group(60, 9, true)}
+                {arrow_right(100, 100, 190)}
+                {rod_group(260, 0, true)}
+                {arrow_right(300, 40, 370)}
+                {rod_group(460, 1, true)}
+                <text class="diagram-caption" x="78" y="240" text-anchor="middle">{strings.diagram_before.clone()}</text>
+                <text class="diagram-caption" x="278" y="240" text-anchor="middle">{strings.diagram_after.clone()}</text>
+                <text class="diagram-caption" x="478" y="240" text-anchor="middle">{strings.diagram_carry.clone()}</text>
             </svg>
             {legend(vec![(strings.diagram_mixed, "mixed")])}
         }
@@ -328,13 +326,14 @@ pub fn SvgDiagram(kind: String, strings: UiStrings) -> impl IntoView {
                 .iter()
                 .enumerate()
                 .map(|(index, (class, label))| {
+                    let x = 30 + index * 112;
                     view! {
-                        <g transform=format!("translate({},0)", 20 + index * 118)>
+                        <g transform=format!("translate({},0)", x)>
                             <g class=format!("diagram-rod {class}")>
                                 {rod_group(0, 8, true)}
                                 <circle class="diagram-unit-mark" cx="18" cy="182" r="2.5" />
                             </g>
-                            <text class="diagram-caption" x="18" y="220" text-anchor="middle">
+                            <text class="diagram-caption" x="18" y="230" text-anchor="middle">
                                 {label.clone()}
                             </text>
                         </g>
@@ -343,7 +342,7 @@ pub fn SvgDiagram(kind: String, strings: UiStrings) -> impl IntoView {
                 })
                 .collect_view();
             view! {
-                <svg class="anzan-diagram-svg" viewBox="0 0 620 240" role="img" aria-label=strings.diagram_before.clone()>
+                <svg class="anzan-diagram-svg" viewBox="0 0 620 280" role="img" aria-label=strings.diagram_before.clone()>
                     {marks}
                 </svg>
             }
@@ -356,101 +355,112 @@ pub fn SvgDiagram(kind: String, strings: UiStrings) -> impl IntoView {
 }
 
 /// Manual completo de fundamentos del soroban.
+///
+/// Los capítulos son pestañas horizontales adosadas, igual que el resto de secciones de
+/// la app. Cada capítulo se construye la primera vez que se abre y se conserva después;
+/// así el manual no llena el DOM inicial con los seis capítulos a la vez.
 #[component]
 pub fn FundamentalsView(strings: UiStrings, content: FundamentalsContent) -> impl IntoView {
     let operation_label = strings.formula_operation.clone();
     let equation_label = strings.formula_equation.clone();
     let note_label = strings.formula_note.clone();
-    let chapters = content
+    let (labels, panels): (Vec<String>, Vec<PanelBuilder>) = content
         .chapters
         .into_iter()
-        .enumerate()
-        .map(|(index, chapter)| {
-            let strings_for_demo = strings.clone();
-            let operation_for_demo = operation_label.clone();
-            let equation_for_demo = equation_label.clone();
-            let note_for_demo = note_label.clone();
-            let sections = chapter
-                .sections
-                .into_iter()
-                .map(|section| {
-                    let heading = section.heading.clone();
-                    let paragraphs = section
-                        .paragraphs
+        .map(|chapter| {
+            // Solo el identificador del capítulo (C1…C6) como etiqueta de pestaña;
+            // el título completo queda en el encabezado del capítulo.
+            let label = chapter.id.clone();
+            let builder = Arc::new({
+                let strings = strings.clone();
+                let operation_label = operation_label.clone();
+                let equation_label = equation_label.clone();
+                let note_label = note_label.clone();
+                let goal = chapter.goal.clone();
+                let sections_data = chapter.sections;
+                move || {
+                    let strings = strings.clone();
+                    let sections = sections_data
                         .iter()
-                        .map(|text| view! { <p>{text.clone()}</p> }.into_any())
-                        .collect_view();
-                    let formulas = section
-                        .formulas
-                        .iter()
-                        .map(|row| {
+                        .map(|section| {
+                            let heading = section.heading.clone();
+                            let paragraphs = section
+                                .paragraphs
+                                .iter()
+                                .map(|text| view! { <p>{text.clone()}</p> }.into_any())
+                                .collect_view();
+                            let formulas = section
+                                .formulas
+                                .iter()
+                                .map(|row| {
+                                    view! {
+                                        <tr>
+                                            <th scope="row">{row.label.clone()}</th>
+                                            <td>{row.equation.clone()}</td>
+                                            <td>{row.note.clone()}</td>
+                                        </tr>
+                                    }
+                                    .into_any()
+                                })
+                                .collect_view();
+                            let steps = section
+                                .steps
+                                .iter()
+                                .map(|text| view! { <li>{text.clone()}</li> }.into_any())
+                                .collect_view();
+                            let tips = section
+                                .tips
+                                .iter()
+                                .map(|text| view! { <li>{text.clone()}</li> }.into_any())
+                                .collect_view();
+                            let has_formulas = !section.formulas.is_empty();
+                            let has_steps = !section.steps.is_empty();
+                            let has_tips = !section.tips.is_empty();
+                            let diagram = section.diagram.clone();
+                            let demo = has_formulas.then(|| {
+                                view! {
+                                    <FormulaDemo section=section.clone() strings=strings.clone() />
+                                }
+                            });
                             view! {
-                                <tr>
-                                    <th scope="row">{row.label.clone()}</th>
-                                    <td>{row.equation.clone()}</td>
-                                    <td>{row.note.clone()}</td>
-                                </tr>
+                                <section class="anzan-chapter-section">
+                                    <h4>{heading}</h4>
+                                    <div class="anzan-chapter-prose">{paragraphs}</div>
+                                    {diagram.map(|kind| view! {
+                                        <SvgDiagram kind=kind strings=strings.clone() />
+                                    })}
+                                    {demo}
+                                    <div class="anzan-table-scroll">
+                                        <table class="anzan-formula-table" hidden=!has_formulas>
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">{operation_label.clone()}</th>
+                                                    <th scope="col">{equation_label.clone()}</th>
+                                                    <th scope="col">{note_label.clone()}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>{formulas}</tbody>
+                                        </table>
+                                    </div>
+                                    <ol class="anzan-chapter-steps" hidden=!has_steps>{steps}</ol>
+                                    <ul class="anzan-chapter-tips" hidden=!has_tips>{tips}</ul>
+                                </section>
                             }
                             .into_any()
                         })
                         .collect_view();
-                    let steps = section
-                        .steps
-                        .iter()
-                        .map(|text| view! { <li>{text.clone()}</li> }.into_any())
-                        .collect_view();
-                    let tips = section
-                        .tips
-                        .iter()
-                        .map(|text| view! { <li>{text.clone()}</li> }.into_any())
-                        .collect_view();
-                    let has_formulas = !section.formulas.is_empty();
-                    let has_steps = !section.steps.is_empty();
-                    let has_tips = !section.tips.is_empty();
-                    let diagram = section.diagram.clone();
-                    let demo = has_formulas.then(|| {
-                        view! {
-                            <FormulaDemo section=section strings=strings_for_demo.clone() />
-                        }
-                    });
                     view! {
-                        <section class="anzan-chapter-section">
-                            <h4>{heading}</h4>
-                            <div class="anzan-chapter-prose">{paragraphs}</div>
-                            {diagram.map(|kind| view! {
-                                <SvgDiagram kind=kind strings=strings_for_demo.clone() />
-                            })}
-                            {demo}
-                            <table class="anzan-formula-table" hidden=!has_formulas>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">{operation_for_demo.clone()}</th>
-                                        <th scope="col">{equation_for_demo.clone()}</th>
-                                        <th scope="col">{note_for_demo.clone()}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>{formulas}</tbody>
-                            </table>
-                            <ol class="anzan-chapter-steps" hidden=!has_steps>{steps}</ol>
-                            <ul class="anzan-chapter-tips" hidden=!has_tips>{tips}</ul>
-                        </section>
+                        <div class="anzan-chapter-body">
+                            <p class="anzan-chapter-goal">{goal.clone()}</p>
+                            {sections}
+                        </div>
                     }
                     .into_any()
-                })
-                .collect_view();
-            view! {
-                <details class="anzan-chapter" open=index == 0>
-                    <summary>
-                        <strong>{chapter.id.clone()}</strong>
-                        {chapter.title.clone()}
-                    </summary>
-                    <p class="anzan-chapter-goal">{chapter.goal.clone()}</p>
-                    {sections}
-                </details>
-            }
-            .into_any()
+                }
+            });
+            (label, builder as PanelBuilder)
         })
-        .collect_view();
+        .unzip();
 
     view! {
         <section class="anzan-fundamentals" aria-labelledby="anzan-fundamentals-title">
@@ -458,7 +468,15 @@ pub fn FundamentalsView(strings: UiStrings, content: FundamentalsContent) -> imp
                 <h3 id="anzan-fundamentals-title">{content.title}</h3>
                 <p>{content.intro}</p>
             </header>
-            {chapters}
+            <div class="anzan-chapter-tabs">
+                <Tabs
+                    id="chapters"
+                    labels=labels
+                    aria_label=strings.subtablist_label.clone()
+                    selected=RwSignal::new(0usize)
+                    panels=panels
+                />
+            </div>
         </section>
     }
 }
