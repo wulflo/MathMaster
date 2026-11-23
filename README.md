@@ -9,7 +9,7 @@
 
 MathMaster is a focused mental-arithmetic trainer built around the **soroban** (Japanese abacus) and *Anzan* (mental calculation). It teaches the abacus step by step, then fades the visual support away until sums, subtractions and front multiplication can be done mentally. The same Leptos UI runs as a static offline web app and inside a Tauri desktop host with native audio.
 
-**🌐 Web app:** <https://wulflo.github.io/MathMaster/> · **📦 Source:** <https://github.com/wulflo/MathMaster>
+**🌐 Web app:** <https://wulflo.github.io/MathMaster/> ·
 
 > The horizontal-tab redesign described below is built and verified locally; the published Pages build may still show the earlier single-column release until it is republished.
 
